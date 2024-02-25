@@ -73,12 +73,14 @@ Documentation, blogs and books sometimes talk about messages when referring to t
 ## Events vs State
 An event says that something has happened or changed, e.g. "Account Created". 
 Ignoring timestamps and metadata it might have a payload like:
+
 ```
 {
   "EventType": "ACCOUNT_CREATED"
   "AccountID": "8c0fd83f-ff3f-4e0e-af4b-2b7470334efa"
 }
 ```
+
 If you want to know about the details of the particular account then you need to get it by some other route like an HTTP request to an accounts REST API or whatever interface is in place. 
 
 *State* on the other hand contains the full state for whatever entity has been created or changed. e.g.
@@ -97,6 +99,7 @@ If you want to know about the details of the particular account then you need to
   .....etc
 }
 ```
+
 In this example I haven't included a field to say if it is created or updated. A downstream doesn't necessarily care if they saw an earlier message, they'll just check if they already have the particular entity or not. We are sending state, not what happened like creation or an update. The exception is deletions that need some special treatment, e.g. a special message type or an empty payload to signify the state is gone. 
 
 State messages can be used in lots of scenarios but are a necessity when going towards an event sourcing route with the event log as the source of truth rather than a database.
@@ -217,6 +220,7 @@ The challenges are primarily around the message bus and the consumer. e.g. worki
 
 As well as the contents of the payload some thought should be given to the message metadata that will make up the standard envelope for all your messages. 
 A few recommendations are:
+
  * include a unique ID on a message regardless of whether it's state, command etc. This ID should just be about the message and not the entity. 
     * for a command an action may not be idempotent, e.g. sending an email is not idempotent and so you must be able to de-duplicate
     * even for state which ideally is idempotent, it's better to avoid duplicating work in consumers and so having an ID to check against makes this easy
@@ -232,6 +236,7 @@ A few recommendations are:
     * also consider a environment flag. It is common to flow production data into test environments so as to provide realistic data. Sometimes you'll want to know about this because, coming from prod, referenced IDs won't exist so a flag let's you know this came from anther environement and not all linked data may have flowed with it
 
  As an example:
+
  ```
  {
   "messageID": "cc7b9901-c339-4c7d-80cd-c400f20581fd"
