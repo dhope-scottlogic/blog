@@ -1,6 +1,6 @@
 ---
 title: Setting Sustainability Non Functional Requirements
-date: 2024-02-19 10:00:00 Z
+date: 2024-06-19 10:00:00 Z
 categories:
 - Data Engineering
 tags:
