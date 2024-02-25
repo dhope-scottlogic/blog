@@ -221,20 +221,29 @@ The challenges are primarily around the message bus and the consumer. e.g. worki
 As well as the contents of the payload some thought should be given to the message metadata that will make up the standard envelope for all your messages. 
 A few recommendations are:
 
- * include a unique ID on a message regardless of whether it's state, command etc. This ID should just be about the message and not the entity. 
-    * for a command an action may not be idempotent, e.g. sending an email is not idempotent and so you must be able to de-duplicate
-    * even for state which ideally is idempotent, it's better to avoid duplicating work in consumers and so having an ID to check against makes this easy
-    * use UUIDs to guarantee uniqueness
- * Include a timestamp in a standard UTC form so that a consumer can reorder messages and be clear about what the timestamp means. 
-     * I recommend this being based on the entity being written to the source database (where applicable) or processed, not the message send time which in a threaded system may be non-deterministic. 
-     * It's debatable but I prefer string versions of the timestamp as it makes debugging easier without having to convert epoch values. e.g. 2024-02-19T12:18:07.000Z
- * Have a plan for versioning. E.g. a field in the envelope. 
-     * Or as part of the message type name if you want to be able to route different versions to different consumers easily
-     * it can be useful have 2 versions, one for the envelope and then another in the payload for the payload version
- * Allow for testing and environments
-    * consider a flag to say if a message is a test one. This will allow easy filtering of test data in prod without polluting your analytics systems
-    * also consider a environment flag. It is common to flow production data into test environments so as to provide realistic data. Sometimes you'll want to know about this because, coming from prod, referenced IDs won't exist so a flag let's you know this came from anther environement and not all linked data may have flowed with it
+### IDs
+ Include a unique ID on a message regardless of whether it's state, command etc. I'd advise UUIDs to guarantee uniqueness. This ID should just be about the message and not the entity. This is useful because:
+ * for a command an action may not be idempotent, e.g. sending an email is not idempotent and so you must be able to de-duplicate
+ * even for state which ideally is idempotent, it's better to avoid duplicating work in consumers and so having an ID to check against makes this easy
 
+
+### Timestamps
+ * Include a timestamp in a standard UTC form so that a consumer can reorder messages and be clear about what the timestamp means. I'd recommend this being based on the entity being written to the source database (where applicable) or processed, not the message send time which in a threaded system may be non-deterministic. 
+
+On the format, it's debatable but I prefer string versions of the timestamp as it makes debugging easier without having to convert epoch values. e.g. 2024-02-19T12:18:07.000Z, not 1708344420000.
+
+### Versioning
+Have a plan for versioning which could be in verion field or be part of the message type name if you want to be able to route different versions to different consumers easily.
+
+Don't confuse the version for the message envelope (shared across many entities) and the version for the specific entity. It's fine to have 2 version numbers, one for each. 
+    
+### Testing and environments
+It'd worth allowing for testing and multiple environments in your messages. 
+For example, consider a flag to say if a message is a test one. This will allow easy filtering of test data in prod without polluting your analytics systems
+
+Also consider a environment flag. It is common to flow production data into test environments so as to provide realistic data. Sometimes you'll want to know about this because, coming from prod, referenced IDs won't exist so a flag let's you know this came from anther environement and not all linked data may have flowed with it
+
+### Example
  As an example:
 
  ```
@@ -243,31 +252,30 @@ A few recommendations are:
   "timestamp": "2024-02-19T12:18:07.000Z"
   "entityType": "ACCOUNT",
   "envelopeVersion": 1,
-  "payloadVersion": 1
   "isTest": true,
   "fromEnvironment": "prod"
   "payload": {
-    "AccountID": "0a0ebe8d-e48a-4195-8372-4f54c5dfd4e5",
-    ""
+    "version" = 1,
+    "accountID": "0a0ebe8d-e48a-4195-8372-4f54c5dfd4e5",
   }
  }
  ```
 
 
 ## Final thoughts
-In this blog I've gone through some types of message that you can send on your message bus and shown some of the pros and cons.
 
-We've seen that instructions are typically used in a workflow where you care about the receipt of that instruction and want to know the state of the action off the back of it. 
+We've been through some of the pros and cons of events vs state and also look at instructions observing the latter are often used in a workflow where you care about the receipt of that instruction and want to know the state of the action off the back of it. 
 
-On state and events, I'm not sure there's ever a 100% correct approach just tradeoffs dependent on the number of consumers, the relationships between your data entities. If I must leave the fence, well I used to favour state but I've found it can be more complex than expected especially for consumers so now I lean slightly towards events:
+On state and events specifically, I'm not sure there's ever a 100% preferred approach just tradeoffs dependent on the number of consumers, the relationships between your data entities. If I must leave the fence, all I'll say is that state messages have often proved more complex than expected so I lean very slightly towards events, all else being equal. A few reasons being:
 
 * only one API for getting the data - don't need to keep 2 in sync
 * consumers don't have to assemble objects turning up in random order
 * one source of truth accessible via the one API
+* no need to worry about replays and backfills - just grab historic data from the REST/GraphQL/RPC API
 
- Still it does mean tighter coupling between services, won't always scale if consumer numbers are high. 
+ Nonetheless events do mean tighter coupling between services and won't always scale if consumer numbers are high.
 
-Whatever you go for, try and make it consistent and logic and don't go into it accidentally, have a clear plan and design according to the route you pick. Don't randomly mix instructions, state and events within a service without any clear reasoning behind why you are using each. But equally don't try and have a one size fits all enterprise wide pattern. Even in a domain it may be fine to have one service emitting state and another service listening to that and sending commands to do specific things when the data changes. 
+Whatever you go for, have a clear plan. try and make it consistent and logical and don't go into it accidentally. Don't randomly mix instructions, state and events within a service without any clear reasoning.  That said, don't try and have a one size fits all enterprise wide pattern. Even in a single domain it may be fine to have one service emitting state and another service listening to that and sending commands to do specific things when the data changes. 
 
 In part 2 I'll go into more detail on state messages looking at how to pick the right granularity for the data. 
 
