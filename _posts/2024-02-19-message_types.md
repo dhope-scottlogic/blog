@@ -1,5 +1,5 @@
 ---
-title: Messaging between services - understanding state, events, commands and how to structure them
+title: Async APIs, don't confuse your events, commands and state
 date: 2024-02-19 10:00:00 Z
 categories:
 - Data Engineering
@@ -8,7 +8,7 @@ tags:
 - Queue
 - Event
 - State Transfer
-summary: This blog is about the different types of message you can put on systems like Rabbit MQ and Kafka. It discusses the differences between commands, events, state and also looks at how granular to make your messages.  
+summary: This blog is about the different types of message you can put on systems like Rabbit MQ and Kafka. It discusses the differences between commands, events, state and gives a few tips for how to structure your messages.
 author: dhope
 ---
 
