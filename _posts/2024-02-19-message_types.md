@@ -264,7 +264,7 @@ Also consider a environment flag. It is common to flow production data into test
 
 ## Final thoughts
 
-We've been through some of the pros and cons of events vs state and also look at instructions observing the latter are often used in a workflow where you care about the receipt of that instruction and want to know the state of the action off the back of it. 
+We've been through some of the pros and cons of events vs state and also looked at commands, observing the latter are often used in a workflow where you care about the receipt of that instruction and want to know the state of the action off the back of it. 
 
 On state and events specifically, I'm not sure there's ever a 100% preferred approach just tradeoffs dependent on the number of consumers, the relationships between your data entities. If I must leave the fence, all I'll say is that state messages have often proved more complex than expected so I lean very slightly towards events, all else being equal. A few reasons being:
 
