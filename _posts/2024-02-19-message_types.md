@@ -264,6 +264,6 @@ On state and events, I'm not sure there's ever a 100% correct approach just trad
 
 Whatever you go for, try and make it consistent and logic and don't go into it accidentally, have a clear plan and design according to the route you pick. Don't randomly mix instructions, state and events within a service without any clear reasoning behind why you are using each. But equally don't try and have a one size fits all enterprise wide pattern. Even in a domain it may be fine to have one service emitting state and another service listening to that and sending commands to do specific things when the data changes. 
 
-Finally do pay proper attention to data consistency and duplicates.
+In part 2 I'll go into more detail on state messages looking at how to pick the right granularity for the data. 
 
 
