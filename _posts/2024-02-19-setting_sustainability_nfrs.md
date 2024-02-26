@@ -1,73 +1,93 @@
 ---
-title: Setting Sustainability Non Functional Requirements
-date: 2024-06-19 10:00:00 Z
+title: How to set non-functional-requirements for 
+date: 2024-05-26 10:00:00 Z
 categories:
-- Data Engineering
+- Sustainability
 tags:
-- Data Strategy
-- Data Transfer
-- Queue
-- Pub/Sub
-summary: This blog is about the different types of message you can put on systems like Rabbit MQ and Kafka. It discusses the differences between commands, events, state and also looks at how granular to make your messages.  
+- Sustainable Software
+- NFRs
+- Quality Attributes
+summary: This blog is about how to set NFRs for carbon emissions including why it's difficult and, what the principles should be and then some examples
 author: dhope
 ---
 
-In this blog post I’ll discuss how you can set non-functional requirements (NFRs) for sustainability and provide some examples.
-In order to understand more about NFRs and why we need to start introducing them for sustainability please see this earlier post. (TODO Insert link once live).
+Until now, the Non-Functional Requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
+ 
+In the face of the increasing global temperatures, the technology sector must now take action to address this imbalance – particularly as the proportion of global carbon emissions deriving from ICT is currently expected to rise from 4% to 14% by 2040.
+ 
+In this blog post, I focus on how to set sustainability NFRs so that you have a carbon or efficiency target alongside your security and availability targets. Sustainability is a wide topic, as my colleague Oliver Cronk explained in this [post](https://blog.scottlogic.com/2023/10/26/conscientious-computing-facing-into-big-tech-challenges.html); I’ll accordingly concentrate on CO2 emissions as this is an area that developers can influence directly, unlike an area such as water usage which is largely in the control of the data centre provider.   
+ 
+In order to understand more about NFRs and why we need to start introducing them for sustainability, please see this earlier post. 
 
-Sustainability is a wide topic but I’ll concentrate on CO2 emissions as this is an area that developers can directly influence unlike something like water usage which is in the control of the data centre provider.  
-
-#### Scope
-This blog post is all about setting the NFRs so you have a carbon or efficiency target alongside you security and availability targets. A subsequent post will look at how to measure CO2 NFRs and ensure software doesn’t deteriorate and continues to meet the targets over its lifetime. 
-
-
-## What prevents us setting sustainability NFRs
-Before going into the details of how to set NFRs I think it’s worth a quick discussion as to the challenges that make it tricky to get into the habit of providing sustainability NFRs.  I see this in terms of both organisational and technical challenges. 
-
-### Organisational challenges
-Sustainability can be likened to cloud cost management and the rise of FinOps. Cost management was (and still is in many orgs) quite immature and is often centred around looking at an existing estate and trying to reduce costs rather than baking them into requirements. Central platform teams provide compute and dev teams don’t consider the cost until an exec notices and demands reductions. Contrast this with the performance (e.g. latency) of a given service, responsibility for which would fall directly on the development team from day 1. 
-A similar problem applies to sustainability concerns, but more so: with CO2 emissions environmental costs are not simply with a central platform team in one company but the whole world meaning there is an ownership problem. That said, this will change as reporting and regulatory constraints hold organisations more responsible for their specific emissions and gradually over time this pushes down to individual teams as is happening with FinOps. 
-
-### Technical challenges
-Let’s take an example of availability: we can pick a customer facing figure like 99.9% and utilise standard techniques like multiple instances, AZs/ data centres and multiple regions to reach that number. The particular details of the workload are to an extent irrelevant (but not completely of course) as standard patterns are applied to reach the number. 
-
-Contrast this with financial cost: it's hard to say in advance that software service A should cost X per month as it will depend quite a lot on the complexity of the business logic and on the other NFRs like availability that may drive up cost so we don’t have standard values like [99%, 99.9%, 99.99%…..]. 
-
-Similar challenges exist for carbon emissions. No one really knows what a particular type of service should cost in carbon for a given number of customers, and especially not in combination with other NFRs like performance and availability. Usually we set those and a cost (financial or carbon) results, not vice versa.
-
-Despite these challenges there is plenty we can do as I’ll now explain starting with some principles behind setting NFRs. 
+To start, I’ll look briefly at why we aren’t setting NFRs around emissions, why it’s tricky and then suggest some ideas to make this easier. 
 
 
-## A basis for setting sustainability NFRs
-When setting NFRs it’s important to understand the drivers for them and to have a basis principles around what they affect and how to set them.
+### Why aren’t we writing sustainability NFRs?
+My experience is that most architects and senior engineers wouldn’t think twice about setting NFRs for performance or scalability yet very rarely set them for sustainability. 
 
-### Company targets
-All NFRs are designed to ensure the software or hardware meets business needs. For example, an availability number is about the cost to reputation or lost sales if a website or API is offline. Similarly a business will have a view on carbon emissions and may be aiming to get to net zero within X years via a set of objectives and initiatives across the org.  Another top down driver might be emissions trading credits as per the EU Emissions Trading System where a metric tonne of CO2 is approximately 30 euros.. As permitted emissions fall and prices rise then it may be more useful to start relating the carbon cost to a financial price to drive NFRs. 
+I suspect the reason is that the costs are generally someone else’s problem in the sense that we don’t personally suffer the effects of our service’s emissions.  Contrast with the case where your app is running too slowly and the engineering team will get a callout.  
 
-A 10% IT reduction objective may become a requirement for all teams to reduce their services 12% (to give margin for growth and additional services) and it may be decided to skew it if one area is known to be particularly inefficient. Either way it provides a carbon budget to individual areas and means a new service will need an emissions target based on the spare margin if additional rather than a replacement. 
+This is a bit like cost management where it’s common for a development team to be given a platform to run apps on with no worry about the costs as another part of the business covers it.  This is now changing with cost and may do so with carbon emissions as excess emissions come with a financial hit that will be pushed down to teams. 
 
-These targets may be scopes 1 and 2 only or also include 3 in which case the range of approaches will be wider as manufacturing and embodied carbon must be thought about.
+### Why is creating sustainability NFRs difficult?
 
-Note that such targets won’t exist in all companies are the lack of them is not a reason not to avoid setting sustainability NFRs – it’s just that it provides more clarity and drive for them where present.
+In short it's hard to say in advance that software service A should generate X emissions per month, because every application is slightly different and has different usage patterns. It’s not as simple as something like availability with a set of standard achieveable values like [99%, 99.5%, 99.9%, …..] that is well understood. 
 
-### Green software principles 
-Within a target there’s multiple ways to achieve it and to set good NFRs sensible principles are needed with a good place to start being the green software principles:
-<img class="none" alt="" src="../dhope/assets/sustainability_part1/green_software_principles.png" />
+Like cost, carbon emissions will very much depend on other  NFRs like performance and availability. There is a mentality where we set those other NFRs as independent variables and a cost (financial or carbon) results as a dependent variable.  We need to move to a mentality where carbon is weighed up independently against all the other NFRs. 
 
-Hardware efficiency and energy efficiency are related but distinct: efficient code can use less hardware but that depends on how efficiently you use the hardware, e.g. one server per app isn’t very efficient even if the app is small and fast.  Hardware also takes account of how often you refresh hardware and how efficient it’s manufacturing was. 
-An NFR may often be met by considering more than one of these. E.g. you could double efficiency of code or run with electricity with half the carbon intensity. 
 
-One level down from this you may have particular aims like making more use of serverless, reducing network chattiness or reducing the staff IT footprint and NFRs should flow from these objectives and promote them.  
 
-### Scott Logic Proposed Carbon Standard
-The Technology Carbon Standard (TCS) breaks down emissions into different types from upstream to downstream as shown:
+## Principles for setting carbon emission NFRs
+Now we’ve said why it’s tricky, let’s try and see how we can improve the situation and set useful NFRs. Firstly, before we can set an NFR we need to work out what we are trying to reduce in more concrete terms. 
 
+### What are we actually trying to reduce?
+Before you say carbon emissions, remember that in technology there’s many sources of those emissions. When setting NFRs we should be sure to think about all of these, especially where our organisation’s targets include Scope 3 emissions like manufacture of servers. See the Scott Logic proposed carbon standard for a summary: 
 
 <img class="none" alt="" src="../dhope/assets/sustainability_part1/tech_carbon_standard.png" />
 
-Typically a given NFR will target a different emissions standard according to the Technology Carbon Standard. E.g. one NFR may be about employee laptop refreshes and thus Category U and another about running more efficiently on a user’s browser so targeting Category D. All emissions are important but different people can impact different categories.
-Classifications and writing a good NFR
+Typically, each NFR will target a different category, e.g. one NFR may be about employee laptop refreshes and thus Category U, and another about running more efficiently on a user’s browser, targeting Category D. All emissions are important but different people and teams can impact different categories.
+
+### Direct vs indirect NFRs
+I’d argue that  when writing sustainability and carbon NFRs we have 2 classes of NFR: direct and indirect. i.e. we can directly address carbon emissions or target some other indirect measure that when optimised also improves emissions.  For example, a target value of server utilisation will also benefit carbon.  Both types of NFR bring value and indirect may be more manageable as a starting point before you get good at measuring your emissions.
+
+### Getting a business steer – top down targets
+NFRs are designed to ensure the software or hardware meets business or regulatory needs. For example, an availability number is about the cost to reputation or lost sales if a website or API is offline. 
+
+To see how this can work for CO2 emissions consider an example where an organisation has pledged to reduce its Scope 2&3 emissions by 10% over 2 years. This may be divided up across the company either evenly (10% everywhere) in an uneven way according to the ease of making improvements and sizes of departments. A similar exercise may be done at different levels cascading down all the way to individual teams and/or services. 
+
+<img class="none" alt="" src="../dhope/assets/sustainability_part1/nfrs_push_down.svg" />
+
+In this case the subscriptions team will get a carbon budget from their existing emissions and the 10% reduction requirement. Observe that cost and carbon NFRs encourage decommissioning as new components will eat into the existing and falling budget.
+
+### Setting realistic numbers
+Targets from above work well for a % improvement but can be more challenging for a new service or where trying to work out where to focus efforts. You may not have a good feel for the problem, for what’s ambitious but realistic and so can’t quickly assign a number like say 100ms latency or 1 year data retention. In this situation I'd say the preferred options are:
+•	Find something similar that already exists and come up with a relative number
+•	Do a spike
+
+Obviously coming up with a relative number requires some ability to measure and understand your existing services in terms of energy and carbon emissions so getting this sorted may be a pre-requisite to setting more mature direct NFRs. 
+
+A spike will allow a rough approximation of the right figure, e.g. energy or CO2 per user request without doing significant development. With a spike, you avoid all the complexities of writing proper infra-as-code, tests, robust error handling, carefully managed metrics etc and can just get a feel for how the main business logic may run and how much energy it should use. 
+
+Over time, this should become easier if knowledge is built up and shared (both within and between companies), leading to good case studies and examples.
+
+### Indirect NFRs
+
+When setting an indirect NFR you will find it useful to start with some solid principles, a good example of which are the Green Software Foundation Green Software Principles below:
+
+<img class="none" alt="" src="../dhope/assets/sustainability_part1/green_software_principles.png" />
+
+These show us 3 different focus areas. Be aware that hardware efficiency and energy efficiency are related but distinct: efficient code can use less hardware but that depends on how efficiently you use the hardware, e.g. one server per app isn’t very efficient, even if the app is small and fast.  Hardware also takes account of how often you refresh hardware and how efficient its manufacturing was. 
+
+An improvement in emissions may often be met by more than one of these, e.g. you could double efficiency of code or run with electricity with half the carbon intensity. 
+
+One level down from this, you may have particular aims like making more use of serverless, reducing network chattiness or reducing the staff IT footprint; NFRs should flow from these objectives and promote them.  
+
+## Writing a good NFR
+This could really be the topic of a few blog posts itself but let’s consider a few quick points before diving into some examples. 
+
+### Quantitative vs qualitative
 NFRs are sometimes a measurable number and sometimes more descriptive:
+
 
 <table>
   <tr>
@@ -93,31 +113,30 @@ NFRs are sometimes a measurable number and sometimes more descriptive:
  
 </table>
 
-Quantitative is preferred over qualitiative so there is something to aim for, test for and validate against. Quantitative may be absolute or relative with the former preferred but the latter may be simpler initially when aiming for improvement. The “scale horizontal” item above might be better as  “service can scale linearly in cost and resources with request per second numbers between 0 and 2m”. 
-Qualitative ones will sometimes need discussion as to whether an implementation plan meets the intent and what is the intent. 
-
+Quantitative is preferred over qualitative so that there is something to aim for, test for and validate against. Quantitative may be absolute or relative, with the former preferred but the latter may be simpler initially when aiming for improvement. The “scale horizontal” item above might be better expressed as, “service can scale linearly in cost and resources with request per second numbers between 0 and 2m”. 
+Qualitative ones will sometimes need discussion as to what the intent is and whether an implementation plan meets it. 
 
 ### Scale factor
-With many NFRs it is sensible to put in a scale factor, otherwise growth in the company may cause the numbers to be exceeded. 
-My recommendation would be that per user targets are used as well as per request ones where appropriate, (e.g. API design) in order to encourage sensible design that minimise the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if 10 requests are needed where one may have been sufficient. 
+With many NFRs, it is sensible to put in a scale factor, otherwise growth in the company may cause the numbers to be exceeded. 
+My recommendation would be that per-user targets are used as well as per-request ones where appropriate, (e.g. API design) in order to encourage sensible design that minimise the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if ten requests are needed where one may have been sufficient. 
 
-### Focus areas
-When developing a service, or app or platform there will be some areas that are likely to be more important than others. Part of the job of NFRs is to highlight these and promote the important characteristics of a system. A project should not be overwhelmed with numerous NFRs many of which are not important and provide a distraction. Similarly NFRs should be appropriate in their asks and not unnecessarily difficult. 
-As an example, we don’t need to push tight carbon emissions per request for a service called a few times a day – it won’t have a useful impact on the wider company’s emissions. On the other hand it might be useful to have an NFR that will flag up if systems are not being scaled down for, e.g. average power of the service over a day or an NFR to check the average scaling of the service. 
-Similarly on data whilst proper dormancy and data management should be a general principle that apply to all software only give it more focus on those applications handling significant quantities. 
+### Relevance
+NFRs should promote the important characteristics of a system and a project should not be overwhelmed with excessive numbers of NFRs, many of which are not important and provide a distraction. Similarly, NFRs should be appropriate in their asks and not unnecessarily difficult. 
+As an example, we don’t need to push tight carbon emissions per request for a service called a few times a day – it won’t have a useful impact on the wider company’s emissions. On the other hand, it might be useful to have an NFR that will flag up where systems are not being scaled down for, e.g. average power of the service over a day or an NFR to check the average scaling of the service. 
 
 ## NFR Examples and Suggestions
-In this section I’ll present some examples of NFRs that promote carbon sustainability and then in later sections discuss how to arrive at these. 
-Many will promote energy efficiency or low carbon at the same time as other NFRs including cost, observability and simplicity. For each one I’ve provided the following information:
-* An “ility” or similar to summarise as is common with NFRs 
-* The NFR itself
-* Info about why this NFR can help and any complications
-* A category from the Scott Logic carbon standard
-* The main principles it addresses from the Sustainable Software Principles
-They are grouped according to the different teams or groups or people who would be paying attention to them like the IT procurement and data development. 
+In this section, I’ll present some examples of NFRs that promote carbon sustainability and then in later sections discuss how to arrive at these. 
+Many will promote energy efficiency or low carbon at the same time as other NFRs including cost, observability and simplicity. For each one, I’ve provided the following information:
+
+*	An “ility” or similar to summarise, as is common with NFRs 
+*	The NFR itself
+*	Info about why this NFR can help, and any complications
+*	A category from the Scott Logic carbon standard
+*	The main principles it addresses from the Sustainable Software Principles
+They are grouped according to the different teams or groups or people who would be paying attention to them, like IT procurement and data development. 
 
 ### Hardware purchasing/procurement
-NFRs are not just for writing software and should also be deployed in decisions around hardware be that user laptops or new server or networking hardware. The aim should be to encourage the purchase of equipment that will last a long time, have low embodied carbon, run efficiently and be easy to monitor.
+NFRs are not just for writing software and should also be deployed in decisions around hardware, be that user laptops or new server or networking hardware. The aim should be to encourage the purchase of equipment that will last a long time, have low embodied carbon, run efficiently, and be easy to monitor.
 
 <table>
   <tr>
@@ -158,7 +177,7 @@ NFRs are not just for writing software and should also be deployed in decisions 
   </tr>
 </table>
 
-## Platform
+### Platform
 Where a central team is providing clusters, databases etc for development teams they will have NFRs and principles to follow around tooling, security etc and should add sustainability objectives to these
 
 <table>
@@ -181,7 +200,7 @@ Where a central team is providing clusters, databases etc for development teams 
     <td></td>
   </tr>
   <tr>
-    <td><b>Emissions efficiency</b> . Overhead emissions per application <NgCO2</td>
+    <td><b>Emissions efficiency</b> . Overhead emissions per application &lt;NgCO2</td>
     <td>Care is needed with technologies like service meshes and WAFs to ensure a lot of heavyweight sidecars aren’t added to every app so useful to look at the overhead emissions on each app</td>
     <td></td>
     <td></td>
@@ -328,7 +347,7 @@ Where a central team is providing clusters, databases etc for development teams 
     <th>GSF Principles</th>
   </tr>
   <tr>
-    <td><b>Energy efficiency. Single page view should use <N kWh energy</b></td>
+    <td><b>Energy efficiency. Single page view should use &lt;N kWh energy</b></td>
     <td>Promote web pages that don’t use a lot of battery or power on the user’s machine</td>
     <td>D</td>
     <td>Energy efficiency</td>
@@ -353,49 +372,48 @@ Where a central team is providing clusters, databases etc for development teams 
   </tr>
 </table>
 
+## Formulating these
+Now I’ve presented some examples of NFRs, I’ll next consider how you might formulate some of the less obvious ones.
 
-## Formulating these 
-Now I’ve presented some examples of NFRs I’ll next consider how you might formulate some of the less obvious ones.  I’ll start with some generalisations and then look
- at a few more concrete examples.
-
-### Top down targets
-As described in “Company Targets” a number may just come from a department carbon budget based on the company objectives. If a feature or service will use more carbon than this then it can’t go ahead or needs a long conversation so effort and innovation must go into meeting this. 
-
-### Doing Spikes
-As mentioned earlier, we don’t yet have standard or easy to decide values for carbon like we do for other NFRs such as a 5 minutes recovery time objective and 99.9% availability. Over time this should become easier if knowledge is built up and shared (both with within and between companies) leading to good case studies and examples.
-Until this point, where it isn’t obvious what a number should be, then a spike may help. This will allow an rough approximation of the right figure, e.g. energy or CO2 per user request without doing significant development. With a spike you avoid all the complexities of writing proper infra-as-code, tests, robust error handling, carefully managed metrics etc and can just get a feel for how the main business logic may run and how much energy it should use. 
-
-### Relative measures
-The easiest option will generally be to specify an improvement relative to what you have be in top down or just set independently in a given team. If you have an existing API and are building a similar one then aim to be more efficient and continually improve. 
-
-### More specific examples
-
-#### Web service estimates, e.g. “Service should generate N gCO2/user/day”
-If we are developing a new service how do we come to a value for N? I’d say there’s 3 options here:
+### Web service estimates, e.g. “Service should generate N gCO2/user/day”
+If we are developing a new service, how do we come to a value for N? We’ve already presented 2 options:
 1.	Spike it to get a target
 2.	Measure an existing service
-a.	Then aim for a 10% or otherwise improvement based on a top down target or the improvements you think are easily possible
-3.	Do a basic analysis
-For 3 you might want to start with a number of requests per user and targeting a number of requests per second for what you view as an efficient implementation. E.g. for a simple JSON lookup service you think that 5k req/s should be possible with 4vCPUs across the app server and database or some multiple, e.g. 10k/s with 0.6vCPUs. Then you can consider wattage of a vCPU and carbon intensity of electricity for an efficient cloud region to get to a target CO2 number. Such an analysis is hard to do and a spike is preferred but it can provide a point for discussion, get the development team thinking about efficiency and over time when it is implemented for real you’ll learn more and be able to improve your models. 
+    a.	Then aim for a 10% or otherwise improvement based on a top-down target or the improvements you think are easily possible
+Another is to do a basic analysis, e.g.
 
-#### Workflow estimates, e.g. “workflow should result in average of <N gCO2 per submission across all components”
-Estimating the energy for a workflow can be challenging. Again ideally you might spike it and approximate the workflow via running multiples with docker compose and measuring. Perhaps the workflow has 10 automated different steps and the total processing time should only be order 5s (ignoring waits and data transfer) then you might want to consider the power of doing  5s of processing, e.g taking a power of 20W for 2 vCPUs on average. It won’t be accurate will flag up anything way above the expected. 
-It can be simpler to have an NFR like “Workflow should use no power when not serving requests” to enforce the fact that everything scales to 0 when not receiving submissions rather than worrying too much about power used whilst particular steps are in play unless volumes are high. 
+1.	start with a number of requests per user 
+2.	target a number of requests per second for what you view as an efficient implementation – 
+a.	e.g. for a simple JSON lookup service, you think that 5k req/s should be possible with 4vCPUs across the app server and database or some multiple, e.g. 10k/s with 0.6vCPUs. 
+3.	Then you can consider wattage of a vCPU and carbon intensity of electricity for an efficient cloud region to get to a target CO2 number. 
 
-#### Machine learning estimates, e.g. “ML Training and execution must be <N gCO2 per user per year”
-Working out the cost of machine learning is not easy and so nor is coming up with a sensible target to promote good practice whilst being realistic. When not experienced in this area it may be best to focus NFRs on ensuring good practice like ensuring the spin down of unused resources, not buying a lot of expensive hardware when shared cloud resources could be used and that sort of thing.  
-That said, a machine learning model will have an associated financial cost and carbon cost, perhaps according to company carbon targets or emissions credits as discussed earlier. In such a case there will be a carbon budget and the NFRs is saying that the ML features need to keep the emissions within these – which may be easy or may result in a compromise on performance.
-The cost of a model will depend on both the training and the execution. Training may be one off and amortized or more likely require updates at a cadence which could be anything from hourly to monthly. 
-Where bottom up approach is wanted it can be challenging to come up with a number. As with the above examples, existing knowledge or spikes may be used to estimate the amount of training needed and then find the most efficient hardware and region. E.g. we assume a particular size and number of CPUs/GPUs and an expected training time and similar for model execution. Estimation of training effort (resources and time) is challenging – it’s not like serving a web request repeatedly and this makes it difficult to provide a good NFR for. It’ll vary significantly on the amount of data, how much pre-processing that data needs, the number of features, layers of a neural net etc. Still, there is some guidance and tooling available, for example see How to Estimate the Time and Cost to Train a Machine Learning Model | by Yuqi Li | Towards Data Science and the referenced aipaca-mlops/ML-training-cost-calculator (github.com) tool. Numbers must be produced in collaboration with the data/ML team and experts in this field and not arbitrarily thrown down by architects – their job is to ensure the right considerations are being discussed around model complexity, where it runs, what will be good enough for the business as an output. 
-I’d suggest starting with quite loose requirements and then designing in iterations with tighter NFRs on later ones with the exception of any huge GPT style training. 
-For a training batch job that isn’t real time, greater flexibility is possible in terms of when and where the workload is run which allows lower estimates for the carbon intensity and so this should be a key focus area as an easy thing to target.
+Such an analysis is hard to do, and a spike is preferred, but it can provide a point for discussion, get the development team thinking about efficiency and over time when it is implemented for real, you’ll learn more and be able to improve your models. 
 
-#### Websites and apps, e.g. “Single page view should use &ltN kWh energy”
-A relative basis here is one way to start. i.e. look at a variety of similar websites and compare their energy usage, e.g. via Firefox energy profiling. Then aim for the best example or better.
-Alternatively, if time and resources allow try and take 1 or 2 of the most popular pages on your site and re-implement as best practice examples according to principles like those here: Seven best practice tips to design low-carbon websites | by Joanna Peel | Medium and Web | Green Software Patterns. You can then take this as a basis for setting targets on those and other similar pages.  Bear in mind some things may be out of control like an advertising plugin.
-It may be useful to think about the energy per user for a given experience over time rather than just per page metrics as they don’t account a design that leads to many page loads to do a particular action. 
+### Workflow estimates, e.g. “workflow should result in average of &lt;N gCO2 per submission across all components”
+Estimating the energy for a workflow can be challenging. Again ideally you might spike it and approximate the workflow via running multiple services with Docker Compose and measuring. 
+
+For a very light analysis, perhaps the workflow has 10 automated different steps and the total processing time should only be order 5s (ignoring waits and data transfer); then you might want to consider the energy consumption of doing 5s of processing, e.g. taking a power of 20W for 2 vCPUs on average. It won’t be accurate but will flag up anything way above the expected. 
+
+It can be simpler to have an NFR like “Workflow should use no power when not serving requests” to enforce the fact that everything scales to 0 when not receiving submissions, rather than worrying too much about power used whilst particular steps are in play unless volumes are high. 
+
+### Machine learning estimates, e.g. “ML Training and execution must be &lt;N gCO2 per user per year”
+When not experienced in this area, it may be best to focus NFRs on ensuring good practice like ensuring the spin down of unused resources and not buying a lot of expensive hardware when shared cloud resources could be used, running slower on lower power hardware where latency isn’t so important.  
+
+Remember to include both training and execution where the former may be one-off and amortised, or more likely require updates at a cadence which could be anything from hourly to monthly.  
+
+If you want a sensible target number and don’t have a target from the business then existing knowledge or spikes may be used to estimate the amount of training needed and model execution energy. Estimation of training effort (resources and time) is especially challenging – it’s not like serving a web request repeatedly. It’ll vary significantly on the amount of data, how much pre-processing that data needs, the number of features, layers of a neural net etc. Still, there is some guidance and tooling available, for example see How to Estimate the Time and Cost to Train a Machine Learning Model | by Yuqi Li | Towards Data Science and the referenced aipaca-mlops/ML-training-cost-calculator (github.com) tool. I’d suggest starting with quite loose requirements and then designing in iterations with tighter NFRs on later ones, with the exception of any huge GPT-style training where you might want to know in advance how much carbon it’ll create as it’ll blow your carbon budget just doing the training. 
+
+For a training batch job that isn’t real-time, greater flexibility is possible in terms of when and where the workload is run, which allows lower estimates for the carbon intensity; this should accordingly make it a key focus area as an easy thing to target with NFRs.
+
+### Websites and apps, e.g. “Single page view should use &lt;N kWh energy”
+A relative basis here is one way to start, i.e. look at a variety of similar websites and compare their energy usage, e.g. via Firefox energy profiling. Then aim for the best example or better.
+
+Alternatively, if time and resources allow, try to take one or two of the most popular pages on your site and re-implement them as best practice examples according to principles like those here: Seven best practice tips to design low-carbon websites | by Joanna Peel | Medium and Web | Green Software Patterns. You can then take this as a basis for setting targets.  Bear in mind that some things may be out of your control, like advertising plugins.
+
+It may be useful to think about the energy per user for a given experience over time rather than just per-page metrics as they don’t account for designs that lead to many page loads to do a particular action. 
 
 ## Conclusions
-In this post I’ve explored the concepts around NFRs and what makes a good NFR. I’ve taken a look at the challenges with writing good NFRs for driving reductions in carbon emissions and shown the similarities with promoting good practices with cloud costs.  Following this I’ve given some examples of possible NFRs and provided some guidance on how to set the values in some of the trickier quantitative NFRs. 
-This is still a very new area and the above are just suggestions for how to proceed based on common sense and what works with existing NFRs. I am unsure of exactly the right approach at this point and I expect thinking around this and tooling to develop significantly over the next few years. Nonetheless I hope the above sparks a few useful ideas if nothing else.
-Nex time in the next part I’ll be looking at how to measure and enforce sustainability NFRs. 
+In this post I’ve taken a look at the challenges with writing good NFRs for driving reductions in carbon emissions and shown the similarities with promoting good practices with cloud costs. Following this, I’ve given some examples of possible NFRs and provided some guidance on how to set the values in some of the trickier quantitative NFRs. 
+
+This is still a very new area, and the above are just suggestions for how to proceed based on common sense and what works with existing NFRs. I am unsure of exactly the right approach at this point, and I expect thinking and tooling around this to develop significantly over the next few years. Nonetheless, I hope the above sparks a few useful ideas if nothing else.
+In the next part, I’ll be looking at how to measure and enforce sustainability NFRs. 
