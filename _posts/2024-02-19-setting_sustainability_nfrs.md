@@ -11,7 +11,7 @@ summary: This blog is about how to set NFRs for carbon emissions including both 
 author: dhope
 ---
 
-Until now, the non-functional-requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
+Until now, the non-functional requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
  
 In the face of the increasing global temperatures, the technology sector must now take action to address this imbalance – particularly as the proportion of global carbon emissions deriving from ICT is currently expected to rise from 4% to 14% by 2040.
  
