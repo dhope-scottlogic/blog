@@ -7,7 +7,7 @@ tags:
 - Sustainable Software
 - NFRs
 - Quality Attributes
-summary: This blog is about how to set NFRs for carbon emissions including why it's difficult, what the principles should be and some examples
+summary: This blog is about how to set NFRs for carbon emissions including both principles and examples
 author: dhope
 ---
 
@@ -17,25 +17,10 @@ In the face of the increasing global temperatures, the technology sector must no
  
 In this blog post, I focus on how to set sustainability NFRs so that you have a carbon or efficiency target alongside your security and availability targets. Sustainability is a wide topic, as my colleague Oliver Cronk explained in this [post](https://blog.scottlogic.com/2023/10/26/conscientious-computing-facing-into-big-tech-challenges.html); I’ll accordingly concentrate on CO2 emissions as this is an area that developers can influence directly, unlike an area such as water usage which is largely in the control of the data centre provider.   
  
-In order to understand more about NFRs and why we need to start introducing them for sustainability, please see this earlier post. 
+Before reading this blog you may wish to have a look at this one first if you haven't already: ToDo add link when live. 
+It gives an introduction to NFRs generally and then looks at why we don't typically set them for sustainability today, why it is difficult and why we should set them. 
 
-To start, I’ll look briefly at why we aren’t setting NFRs around emissions, why it’s tricky and then suggest some ideas to make this easier. 
-
-
-### Why aren’t we writing sustainability NFRs?
-My experience is that most architects and senior engineers wouldn’t think twice about setting NFRs for performance or scalability yet very rarely set them for sustainability. 
-
-I suspect the reason is that the costs are generally someone else’s problem in the sense that we don’t personally suffer the effects of our service’s emissions.  Contrast with the case where your app is running too slowly and the engineering team will get a callout.  
-
-This is a bit like cost management where it’s common for a development team to be given a platform to run apps on with no worry about the costs as another part of the business covers it.  This is now changing with cost and may do so with carbon emissions as excess emissions come with a financial hit that will be pushed down to teams. 
-
-### Why is creating sustainability NFRs difficult?
-
-In short it's hard to say in advance that software service A should generate X emissions per month, because every application is slightly different and has different usage patterns. It’s not as simple as something like availability with a set of standard achieveable values like [99%, 99.5%, 99.9%, …..] that is well understood. 
-
-Like cost, carbon emissions will very much depend on other  NFRs like performance and availability. There is a mentality where we set those other NFRs as independent variables and a cost (financial or carbon) results as a dependent variable.  We need to move to a mentality where carbon is weighed up independently against all the other NFRs. 
-
-
+With this blog I aim to give some practical advise that will make it easier to get into the habit of including measures that will help carbon emissions when writing NFRs.
 
 ## Principles for setting carbon emission NFRs
 Now we’ve said why it’s tricky, let’s try and see how we can improve the situation and set useful NFRs. Firstly, before we can set an NFR we need to work out what we are trying to reduce in more concrete terms. 
