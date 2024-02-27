@@ -12,9 +12,9 @@ summary: This blog is about the different types of message you can put on system
 author: dhope
 ---
 
-In part 1 I looked at the differences between events, state transfer, commands and time series data. I didn't go into much depth though on the precise details of the payloads, it was more about the classes of message.  
+In part 1 I looked at the differences between events, state transfer, commands and time series data. I didn't go into much depth though on the precise details of the payloads, it was more about the classes of message so that's what this blog is about.  
 
-I think the design of message payloads is quite an important topic that isn't given as much time and thought as it should be. In the relational database world when designing a schema a lot of thought is given as to the right entities, the level of normalisation and the relationships between tables. My experience is that this is given a lot less time when it comes to messages and so I'll try and address this, looking at some of the complications that occur with certain event patterns, including granularity, normalisation and enrichment pipelines. 
+I think the design of message payloads is quite an important topic that isn't given as much time and thought as it should be. In the relational database world when designing a schema a lot of thought is given as to the right entities, the level of normalisation and the relationships between tables. My experience is that this is given less consideration when it comes to messages and so I'll try and address this, looking at some of the complications that occur with certain event patterns, including topics like granularity, normalisation and enrichment pipelines. 
 
 ## Granularity
 
@@ -22,39 +22,47 @@ To understand what I mean by granularity consider the following diagram:
 <img class="none" alt="TODO" src="../dhope/assets/messagetypes_p2/granularity2.svg" />
 We see 2 applications/services and 3 endpoints. The profile service has a separate email change endpoint as this comes with extra logic around validation and security. 
 Nonetheless the service puts out a single message including all profile data. 
+ Many consumers want profile and preferences data together so there is an aggregation service producing messages for consumers that have everything about the user. 
 
-Additionally there is a user preferences service for general user preferences. Many consumers want all this data so there is an aggregation service producing messages for consumers that have everything about the user. 
+An alternative approach might be:
+<img class="none" alt="TODO" src="../dhope/assets/messagetypes_p2/more_granular.svg" />
+where we have lots of smaller messages and they are never joined for the consumers. 
 
-There's 3 decision points here where specific choices have been made in the above example:
+Breaking this down, there's 3 decision points here where specific choices have been made in the above example:
  * Should each endpoint send out an event matching the payload
-    * or divide it into smaller messages for field sets
+    * or should divide it into smaller messages for particular field sets
  * Should one endpoint aggregate into its messages data that has come from another endpoint
  * Should multiple messages (from multiple systems) be aggregated before they reach consumers
 
 I'll describe these in a bit more detail before moving on to the advantages and pitfalls. 
 
 ### Endpoint to message mapping
-Say there is a single update profile REST endpoint, e.g. PUT /profile with a payload including an email, postal address, phone number etc. 
+Let's there is a single update profile REST endpoint, e.g. PUT /profile where the XML/JSON payload includes an email, postal address, phone number etc. 
 
-When generating a message there is a choice between sending out one "PROFILE UPDATED" event or state message or separate ones like "EMAIL_CHANGED", "ADDRESS_CHANGED" etc and address itself could divde down to postcode, number etc although this wouldn't make a lot of sense as the fields change together. 
+When generating a message there is a choice between
+ 1. sending out one "PROFILE UPDATED" event or a state message
+ 2. separate ones like "EMAIL_CHANGED", "ADDRESS_CHANGED" etc 
+    * an address itself could divde down to postcode, number etc although this wouldn't make a lot of sense as the fields change together. 
+    * a PUT to the endpoint may provide a new version of all fields or more likely just a few related fields may change, e.g. house number and postcode. 
 
 In option 1 a consumer will subscribe to this particular field because they are interested in its value. 
 
 In option 2 a consumer system that only cares about the email doesn't know if the email changed or not without doing a comparison because maybe the postcode changed or some other field. They may end up processing a large volume of messages unnecessarily if some other field regularly changes that they don't care about. Functionally this may be fine but it won't help non-functions around cost and energy. Change lists can reduce the effort but see later discussion. 
 
 ### Aggregation across endpoints
-Let's consider the simplest scenario of a single endpoint, "Update email" in some user profile service. There is a question over how much data to put in a message once the email changes (we'll ignore complexities of changing email).  
 
-Consider 2 cases for when this changes in a particular service:
+Next let's think about the scenario shown in the diagram with a separate endpoint for changing the email. 
+There is a question over how much data to put in a message once the email changes (we'll ignore complexities of changing email).  We may send a separate message for the email but what about the profile, wouldnt't a consumer expect to find an email in a profile message. If we find that persuasive then we might just send a "PROFILE UPDATED" message including the email. 
 
-1. An event like "EMAIL_UPDATED" is emitted or state with just the email -  this is a very specific message about a specific field of data. 
-2. Alternatively there is a "PROFILE UPDATED" event message or a PROFILE state message where a profile includes the email, postal address and much else as per the earlier diagram. 
-
-
+Such an approach makes good sense but comes with some consistency risks that'll we'll discuss shortly
 
 ### Aggregation across services
+Finally we may choose to aggregate multiple messages before delivery to a set of consumers. This, as we'll see can simplify consumers as they get all the data they want in one single message but it also has some costs around consistency that we'll see. 
 
-## Challenge of going very granular
+## Message volumes and granularity
+There's 2 contrasting ways of looking at this:
+ * more message types is more messages
+ * more message type is better filtering
 Going to granular field level messages means there's focused events or state where a consumer knows exactly what has happened and only subscribes to relevant changes but....this has a knock on effect for producers. Think about how we structure our APIs, we often have a POST or PUT that updates a group of fields together. For example, think about a web page with a large form to fill out or even a few separate pages but where the request isn't sent to the server till the end once all data is collected. 
 
 In this case we could send a separate event for every field (with the producer doing some form of diff to the existing)but there's downside to this:

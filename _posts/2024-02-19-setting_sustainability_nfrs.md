@@ -1,17 +1,17 @@
 ---
-title: How to set non-functional-requirements for 
-date: 2024-05-26 10:00:00 Z
+title: How to set non-functional-requirements for sustainability
+date: 2024-02-26 10:00:00 Z
 categories:
 - Sustainability
 tags:
 - Sustainable Software
 - NFRs
 - Quality Attributes
-summary: This blog is about how to set NFRs for carbon emissions including why it's difficult and, what the principles should be and then some examples
+summary: This blog is about how to set NFRs for carbon emissions including why it's difficult, what the principles should be and some examples
 author: dhope
 ---
 
-Until now, the Non-Functional Requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
+Until now, the non-functional-requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
  
 In the face of the increasing global temperatures, the technology sector must now take action to address this imbalance – particularly as the proportion of global carbon emissions deriving from ICT is currently expected to rise from 4% to 14% by 2040.
  
@@ -373,7 +373,7 @@ Where a central team is providing clusters, databases etc for development teams 
 </table>
 
 ## Formulating these
-Now I’ve presented some examples of NFRs, I’ll next consider how you might formulate some of the less obvious ones.
+Now I’ve presented some examples of NFRs, I’ll next consider how you might formulate some of the less obvious ones linking back to the advice in earlier sections. 
 
 ### Web service estimates, e.g. “Service should generate N gCO2/user/day”
 If we are developing a new service, how do we come to a value for N? We’ve already presented 2 options:
@@ -413,7 +413,6 @@ Alternatively, if time and resources allow, try to take one or two of the most p
 It may be useful to think about the energy per user for a given experience over time rather than just per-page metrics as they don’t account for designs that lead to many page loads to do a particular action. 
 
 ## Conclusions
-In this post I’ve taken a look at the challenges with writing good NFRs for driving reductions in carbon emissions and shown the similarities with promoting good practices with cloud costs. Following this, I’ve given some examples of possible NFRs and provided some guidance on how to set the values in some of the trickier quantitative NFRs. 
+In this post I’ve talked about why it can be tricky to write NFRs for minimising carbon emissions and then given some principles to try and make this easier. Following this, I’ve given some examples and provided guidance on how to come up with numbers where there's a lot of unknowns. I believe that there is much in common with cost management both in terms of the challenges in setting the NFRs and the benefits of setting them; many NFRs promoting low carbon will also promote low cost.
 
-This is still a very new area, and the above are just suggestions for how to proceed based on common sense and what works with existing NFRs. I am unsure of exactly the right approach at this point, and I expect thinking and tooling around this to develop significantly over the next few years. Nonetheless, I hope the above sparks a few useful ideas if nothing else.
-In the next part, I’ll be looking at how to measure and enforce sustainability NFRs. 
+This is still a very new area, and the above are just suggestions for how to proceed based on common sense and what works with existing NFRs. I am unsure of exactly the right approach at this point, and I expect thinking and tooling around this to develop significantly over the next few years. Nonetheless, I hope the above sparks a few useful ideas if nothing else. In the next part, I’ll be looking at how to measure and enforce sustainability NFRs. 
