@@ -1,5 +1,5 @@
 ---
-title: How to set non-functional-requirements for sustainability
+title: How to set non-functional requirements for sustainability
 date: 2024-02-26 10:00:00 Z
 categories:
 - Sustainability
