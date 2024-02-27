@@ -17,7 +17,7 @@ In the face of the increasing global temperatures, the technology sector must no
  
 In this blog post, I focus on how to set sustainability NFRs so that you have a carbon or efficiency target alongside your security and availability targets. Sustainability is a wide topic, as my colleague Oliver Cronk explained in this [post](https://blog.scottlogic.com/2023/10/26/conscientious-computing-facing-into-big-tech-challenges.html); I’ll accordingly concentrate on CO2 emissions as this is an area that developers can influence directly, unlike an area such as water usage which is largely in the control of the data centre provider.   
  
-Before reading this blog you may wish to have a look at this one first if you haven't already: ToDo add link when live. 
+Before reading this blog you may wish to have a look at this one first if you haven't already: TODO.v 
 It gives an introduction to NFRs generally and then looks at why we don't typically set them for sustainability today, why it is difficult and why we should set them. 
 
 With this blog I aim to give some practical advise that will make it easier to get into the habit of including measures that will help carbon emissions when writing NFRs.
@@ -28,7 +28,7 @@ Now we’ve said why it’s tricky, let’s try and see how we can improve the s
 ### What are we actually trying to reduce?
 Before you say carbon emissions, remember that in technology there’s many sources of those emissions. When setting NFRs we should be sure to think about all of these, especially where our organisation’s targets include Scope 3 emissions like manufacture of servers. See the Scott Logic proposed carbon standard for a summary: 
 
-<img class="none" alt="" src="../dhope/assets/sustainability_part1/tech_carbon_standard.png" />
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/tech_carbon_standard.png" />
 
 Typically, each NFR will target a different category, e.g. one NFR may be about employee laptop refreshes and thus Category U, and another about running more efficiently on a user’s browser, targeting Category D. All emissions are important but different people and teams can impact different categories.
 
@@ -40,7 +40,7 @@ NFRs are designed to ensure the software or hardware meets business or regulator
 
 To see how this can work for CO2 emissions consider an example where an organisation has pledged to reduce its Scope 2&3 emissions by 10% over 2 years. This may be divided up across the company either evenly (10% everywhere) in an uneven way according to the ease of making improvements and sizes of departments. A similar exercise may be done at different levels cascading down all the way to individual teams and/or services. 
 
-<img class="none" alt="" src="../dhope/assets/sustainability_part1/nfrs_push_down.svg" />
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/nfrs_push_down.svg" />
 
 In this case the subscriptions team will get a carbon budget from their existing emissions and the 10% reduction requirement. Observe that cost and carbon NFRs encourage decommissioning as new components will eat into the existing and falling budget.
 
@@ -59,7 +59,7 @@ Over time, this should become easier if knowledge is built up and shared (both w
 
 When setting an indirect NFR you will find it useful to start with some solid principles, a good example of which are the Green Software Foundation Green Software Principles below:
 
-<img class="none" alt="" src="../dhope/assets/sustainability_part1/green_software_principles.png" />
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/green_software_principles.png" />
 
 These show us 3 different focus areas. Be aware that hardware efficiency and energy efficiency are related but distinct: efficient code can use less hardware but that depends on how efficiently you use the hardware, e.g. one server per app isn’t very efficient, even if the app is small and fast.  Hardware also takes account of how often you refresh hardware and how efficient its manufacturing was. 
 
