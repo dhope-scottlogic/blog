@@ -74,18 +74,21 @@ Documentation, blogs and books sometimes talk about messages when referring to t
 An event says that something has happened or changed, e.g. "Account Created". 
 Ignoring timestamps and metadata it might have a payload like:
 
-```
+<pre>
+<code>
 {
   "EventType": "ACCOUNT_CREATED"
   "AccountID": "8c0fd83f-ff3f-4e0e-af4b-2b7470334efa"
 }
-```
+</code>
+</pre>
 
 If you want to know about the details of the particular account then you need to get it by some other route like an HTTP request to an accounts REST API or whatever interface is in place. 
 
 *State* on the other hand contains the full state for whatever entity has been created or changed. e.g.
 
-```
+<pre>
+<code>
 {
   "EntityType": "ACCOUNT"
   "ID": "8c0fd83f-ff3f-4e0e-af4b-2b7470334efa",
@@ -98,7 +101,8 @@ If you want to know about the details of the particular account then you need to
   }
   .....etc
 }
-```
+</pre>
+</code>
 
 In this example I haven't included a field to say if it is created or updated. A downstream doesn't necessarily care if they saw an earlier message, they'll just check if they already have the particular entity or not. We are sending state, not what happened like creation or an update. The exception is deletions that need some special treatment, e.g. a special message type or an empty payload to signify the state is gone. 
 
@@ -156,15 +160,15 @@ Relating to the number of consumers, if your API is not that reliable then the s
 A few points here like resilience are really a form of coupling. If a service must call another service's API to get data it is more closely coupled to that service than a state message solution where the consumer needs to know nothing about the producer and isn't dependent on it's name, resilience, API schema etc
 
 #### Data Transfer Volumes
-If most consumers only want 2 or 3 fields but the state messages have 200 fields in them it can be wasteful. In this case an event option will be more efficient assuming the syncronous APIs (e.g. REST, GraphQL) are more fine grained. It's not a major plus for small focused state objects (e.g. 10-20 fields) but more important if sending large chunks of data around going into the 10s of kBs.
+If most consumers only want 2 or 3 fields but the state messages have 200 fields in them it can be wasteful. In this case an event option will be more efficient assuming the synchronous APIs (e.g. REST, GraphQL) are more fine grained. It's not a major plus for small focused state objects (e.g. 10-20 fields) but more important if sending large chunks of data around going into the 10s of kBs.
 
 #### Consumer simplicity
 
 Sometimes I've heard people assert that a state message is simpler because there's no need to make a call to an API which is true. But... it isn't always so straightforward. This is best explained with an example. Consider the following scenario:
 
  * the data of interest is a user's account detail 
- * you want to send emails or an SMS to the user for security reasons when properties on the account like the email address change
- * you've takes the state message approach
+ * you want to send an email or SMS to the user for security reasons when properties on the account change such as the email address change
+ * you've taken the state message approach
  * you don't include a change list, just the current state. 
  
  Any service that is responsible for sending the email or SMS has to have it's own state so it can compare before and after values and see that the email changed rather than some other field like name.
@@ -246,7 +250,8 @@ Also consider a environment flag. It is common to flow production data into test
 ### Example
  As an example:
 
- ```
+<pre>
+<code>
  {
   "messageID": "cc7b9901-c339-4c7d-80cd-c400f20581fd"
   "timestamp": "2024-02-19T12:18:07.000Z"
@@ -259,8 +264,8 @@ Also consider a environment flag. It is common to flow production data into test
     "accountID": "0a0ebe8d-e48a-4195-8372-4f54c5dfd4e5",
   }
  }
- ```
-
+</pre>
+</code>
 
 ## Final thoughts
 
