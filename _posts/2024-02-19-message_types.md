@@ -101,8 +101,8 @@ If you want to know about the details of the particular account then you need to
   }
   .....etc
 }
-</pre>
 </code>
+</pre>
 
 In this example I haven't included a field to say if it is created or updated. A downstream doesn't necessarily care if they saw an earlier message, they'll just check if they already have the particular entity or not. We are sending state, not what happened like creation or an update. The exception is deletions that need some special treatment, e.g. a special message type or an empty payload to signify the state is gone. 
 
@@ -264,8 +264,8 @@ Also consider a environment flag. It is common to flow production data into test
     "accountID": "0a0ebe8d-e48a-4195-8372-4f54c5dfd4e5",
   }
  }
-</pre>
 </code>
+</pre>
 
 ## Final thoughts
 
