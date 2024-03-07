@@ -1,6 +1,6 @@
 ---
 title: How to sustain your sustainability NFRs
-date: 2024-02-26 10:00:00 Z
+date: 2024-03-07 09:00:00 Z
 categories:
 - Sustainability
 tags:
