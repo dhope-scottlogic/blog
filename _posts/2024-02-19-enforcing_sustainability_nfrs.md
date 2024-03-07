@@ -23,12 +23,17 @@ Just as a quick recap, some sustainable NFRs are:
 
 ## What do we want to achieve
 In software architecture we sometimes talk about fitness functions and these are about ensuring a system meets its non-functional requirements. The aims of these functions are to ensure:
-1.	NFRs are achieved on initial launch of a system or component
-2.	NFRs continue to be achieved over time as changes happen to the system
+
+ 1.	NFRs are achieved on initial launch of a system or component
+ 2.	NFRs continue to be achieved over time as changes happen to the system
+
 2 is of particular importance because a lot of software generally degrades over time. The original team members leave, understanding is lost, new functionality is quickly hacked in and the quality of the software gets worse. It could be that new screens lack accessibility tags or maintainability drops or performance degrades. For example, software with an event driven ethos could later have some polling rushed in that ramps up energy usage but no one notices as it’s not being checked or observed. 
+
 Observability is therefore key and by making these characteristics observable and acting on changes we can ensure that software maintains it’s quality and conforms to the NFRs not just initially but long term. There’s 2 places we can assess the conformance to the NFRs:
+
 1.	CI/CD Pipeline before deployment
 2.	Live monitoring in production
+
 There’s a place for both of these and they can address different things.  The table below shows what each type can offer:
 
 <table>
