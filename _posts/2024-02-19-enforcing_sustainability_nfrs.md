@@ -95,6 +95,7 @@ Be careful here to consider test consistency for reporting and checking you are 
 Where observing energy in a real system you may have what I call onboard vs offboard measurements. With onboard an app is provided at runtime with all the data it needs to get it’s energy usage as it runs and/or handles requests. With this information it can actually insert energy data into response headers or message metadata for the benefit of the upstream caller or downstream consumer respectively. 
 
 The alternative I call offboard is where this info is not available to the running app and so various metrics are aggregated externally. E.g. where a container app doesn’t know if it’s on ARM or some Xeon chip you’d need the offboard processing and also where an NFR is about the aggregate across many VM/Container/Function instances and each instance only knows about itself. 
+
 Onboard has many advantages for chaining components but is hard to do – consider combining such that onboard data periodically updates apps giving them a figure they can report to callers.  Care is needed though to not mix up low level infra code with the business logic. 
 
 Note: I don’t use the term online/offline as the offboard may still be near realtime just that it isn’t being done onboard the component generating the energy. 
@@ -117,6 +118,7 @@ Accuracy will never be perfect without the visibility of the physical hardware a
 
 #### Containers
 Even though we can approximate VM power what we really want is application power and this is more complex still.  In short, some form of model is needed based on CPU utilisation of each process vs total power in the VM. The [Kepler](https://sustainable-computing.io/) tool offers a way to do this when running a Kubernetes (K8s) cluster by taking using eBPF (an OS Kernel plugin mechanism) to observe context switches and get CPU cycle counts on process entry and exit and then relate this to total power of the host on which the container/process runs (don’t forget a container is just a process with some barriers around it). 
+
 If using something else like AWS ECS then you’ll have to approximate yourself. For example by getting VM energy from the CCF tool and taking utilisation from the Cloudwatch metrics for all services and allocating energy proportionally. 
 
 #### Sub-process (e.g. Request level)
