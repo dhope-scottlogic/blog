@@ -58,7 +58,7 @@ There’s a place for both of these and they can address different things.  The 
 A middle ground is releasing to production via feature flags or red/black or canary deployments providing a real environment but the opportunity to gate. However, in the case of energy measurement this has the challenge that isolation of a change for measurement is difficult as we’ll shortly see in the energy measurement sections. 
 When an NFR is assessed in build or prod we may classify the result as green, amber or red where amber warrant discussion but not necessarily block a release or require immediate action if live. 
 
-<img class="none" alt="Green, amber, red circles with text saying ok, not meeting but non urgent and action needed respectively" style="max-width: 400px" src="../dhope/assets/sustainability_part2/traffic_lights.svg" />
+<img class="none" alt="Green, amber, red circles with text saying ok, not meeting but non urgent and action needed respectively" style="max-width: 400px" src="{{ site.github.url }}/dhope/assets/sustainability_part2/traffic_lights.svg" />
 
 In this case the subscriptions team will get a carbon budget from their existing emissions and the 10% reduction requirement. Observe that cost and carbon NFRs encourage decommissioning as new components will eat into the existing and falling budget.
 
@@ -82,7 +82,7 @@ To observe in prod you can combine traffic metrics (e.g. from Prometheus) with a
 Now we get onto the tricky part, CO2 measurements, we’ll start by considering energy vs CO2 and then look at measurement options at different granularities
 
 ### CO2 vs energy
-First of all, assume that energy can be used as a proxy for CO2 so and the remainder of this post I’ll primarily talk about energy.  You just need the carbon intensity multiplier to go between them which can vary by location and time and for greatest accuracy you’d pull this from an API like Electricity Maps or equivalents. That said an occasionally updated constant (per country) is ok as a start. 
+First of all, assume that energy can be used as a proxy for CO2 so and the remainder of this post I’ll primarily talk about energy.  You just need the carbon intensity multiplier to go between them which can vary by location and time and for greatest accuracy you’d pull this from an API like [Electricity Maps](https://www.electricitymaps.com/) or equivalents. That said an occasionally updated constant (per country) is ok as a start. 
 
 Be careful here to consider test consistency for reporting and checking you are running in a low carbon region you care about the carbon  but additionally you want a constant value so you can see if your code is causing greater emissions rather than the grid. 
 
@@ -98,7 +98,7 @@ Note: I don’t use the term online/offline as the offboard may still be near re
 Let’s now look at how energy can be measured for a single application – we’ll move onto services provided by multiple apps later. 
 The diagram below shows different levels of granularity from energy of a physical server down to a particular web request (or some action or thread etc) within a single process and we’ll look next at our options for measuring energy at each level.
 
-<img class="none" alt="4 squares each inside the larger saying physical machine, then in that virtual machine, then in that process or container and then in that request" style="max-width: 400px" src="../dhope/assets/sustainability_part2/measurement_granularities.svg" />
+<img class="none" alt="4 squares each inside the larger saying physical machine, then in that virtual machine, then in that process or container and then in that request" style="max-width: 400px" src="{{ site.github.url }}/dhope/assets/sustainability_part2/measurement_granularities.svg" />
 
 #### Physical machine
 Power can be directly measured at the level of the physical machine via either RAPL (or equivalents for non x86) or motherboard sensors and this is only at CPU and memory level at best – core level measurement doesn’t exist (but can be estimated). External GPUs have other options such as Nvidia NVLM.
@@ -106,18 +106,18 @@ Power can be directly measured at the level of the physical machine via either R
 Machine measurement is only an option for your own hardware; you wouldn’t typically get this for multi-tenant cloud and it does of course require instrumentation on the hardware for pushing metrics or providing a pull API 
 
 #### Virtual Machine
-Physical power may be attributed to VMs in various ways including number of allocated cores/hyperthreads (easiest option) or measured usage (if visible). Approximations are needed for cloud where raw power is not accessible but we do know about the instance type, allocated vCPUs and utilisation. See, for example, the Teads methodology for AWS or the Cloud Carbon Footprint (CCF) tool and the Green Coding Berlin tool can help with on-prem and cloud modelling. 
+Physical power may be attributed to VMs in various ways including number of allocated cores/hyperthreads (easiest option) or measured usage (if visible). Approximations are needed for cloud where raw power is not accessible but we do know about the instance type, allocated vCPUs and utilisation. See, for example, the [Teads](https://medium.com/teads-engineering/estimating-aws-ec2-instances-power-consumption-c9745e347959) methodology for AWS or the [Cloud Carbon Footprint](https://www.cloudcarbonfootprint.org/) (CCF) tool and the [Green Coding Berlin](https://github.com/green-coding-solutions/spec-power-model) tool can help with on-prem and cloud modelling. 
 
 Accuracy will never be perfect without the visibility of the physical hardware and the other VMs sharing it so this must just be accepted until/if cloud vendors provide more data. 
 
 #### Containers
-Even though we can approximate VM power what we really want is application power and this is more complex still.  In short, some form of model is needed based on CPU utilisation of each process vs total power in the VM. The Kepler tool offers a way to do this when running a Kubernetes (K8s) cluster by taking using eBPF (an OS Kernel plugin mechanism) to observe context switches and get CPU cycle counts on process entry and exit and then relate this to total power of the host on which the container/process runs (don’t forget a container is just a process with some barriers around it). 
+Even though we can approximate VM power what we really want is application power and this is more complex still.  In short, some form of model is needed based on CPU utilisation of each process vs total power in the VM. The [Kepler](https://sustainable-computing.io/) tool offers a way to do this when running a Kubernetes (K8s) cluster by taking using eBPF (an OS Kernel plugin mechanism) to observe context switches and get CPU cycle counts on process entry and exit and then relate this to total power of the host on which the container/process runs (don’t forget a container is just a process with some barriers around it). 
 If using something else like AWS ECS then you’ll have to approximate yourself. For example by getting VM energy from the CCF tool and taking utilisation from the Cloudwatch metrics for all services and allocating energy proportionally. 
 
 #### Sub-process (e.g. Request level)
 This is one level below an operating system process. E.g. endpoint energy in a typical web service with many endpoints or where a database is supporting multiple applications and you only want to measure one app end to end:
 
-<img class="none" style="max-width: 400px" alt="simple sketch of 2 apps both using one database" src="../dhope/assets/sustainability_part2/shared_database.svg" />
+<img class="none" style="max-width: 400px" alt="simple sketch of 2 apps both using one database" src="{{ site.github.url }}/dhope/assets/sustainability_part2/shared_database.svg" />
 
 It’s not such a problem for tests as you can control the requests passed during but consider the case where you want to differentiate the energy spent on POST /account vs GET /payments (to make up some example endpoints) in prod. You could look at the following to try and attribute energy to each type:
 
@@ -153,29 +153,29 @@ Be aware that cloud vendors provide CO2 data but it’s not real time (e.g. 1 mo
 ### Multiple applications supplying a service
 What if there are multiple applications providing a service and we want to know the energy in providing the service as a whole: 
 
-<img class="none" alt="simple sketch with 3 boxes representing apps where the first calls the second and the second the third" style="max-height: 100px" src="../dhope/assets/sustainability_part2/multiple_apps.svg" />
+<img class="none" alt="simple sketch with 3 boxes representing apps where the first calls the second and the second the third" style="max-height: 100px" src="{{ site.github.url }}/dhope/assets/sustainability_part2/multiple_apps.svg" />
 
 Here app 1 uses Apps 2&3 to do it’s work so all must be measured (or approximated) in order to meet an NFR and we must ensure that only consider the energy used by 2 and 3 in serving requests back to 1 is included. How might we do this?
 
 #### Onboard 
 Referring back to the idea of onboard vs offboard measurements ideally app 3 would report energy back to app 2 in request headers or equivalent so it could just add this into its total energy for servicing requests. To be able to do this instrumentation would need to be present on the host and exposed into the app execution environment – shown as a container in a Kubernetes (K8s) cluster below. 
 
-<img class="none" alt="Sketch with 3 containerised apps running in 3 VMS where the VMs provide data into the VM and the apps return the energy back to the caller in the response" src="../dhope/assets/sustainability_part2/returning_energy_in_chain.svg" />
+<img class="none" alt="Sketch with 3 containerised apps running in 3 VMS where the VMs provide data into the VM and the apps return the energy back to the caller in the response" src="{{ site.github.url }}/dhope/assets/sustainability_part2/returning_energy_in_chain.svg" />
 
 #### Offboard
 For an offboard solution we could provide multiple metrics from various sources such as cloud metrics about VM utilisation, metric from the running apps and metrics about the size of the Docker containers running the code. Application metrics must include the relevant upstream request type in the tags/labels in addition to correlation ID if you want to get energy for a particular request.  
 
 
-<img class="none" alt="Sketch with 3 containerised apps running in 3 VMS where the VMs and apps emit metrics that are processed in Spark to calculate energy which is then sent to the monitoring service" src="../dhope/assets/sustainability_part2/metrics_multiple.svg" />
+<img class="none" alt="Sketch with 3 containerised apps running in 3 VMS where the VMs and apps emit metrics that are processed in Spark to calculate energy which is then sent to the monitoring service" src="{{ site.github.url }}/dhope/assets/sustainability_part2/metrics_multiple.svg" />
 
 #### Combining
 As mentioned earlier there may be a third way where energy usage is calculated offboard but regularly or even real time and then feedback as shown below in a slightly zoomed out variation of the previous diagram. This then allows the first service to roughly know their current average energy per request and send that back to all callers simplifying them and meaning decoupling is a lot less. 
 
 
-<img class="none" alt="Combination of previous diagrams, this time the Spark job having processed the data from the 3 apps pushes it back into them so that they know their current energy usage and can emit it on their request headers" src="../dhope/assets/sustainability_part2/monitor_feedback.svg" />
+<img class="none" alt="Combination of previous diagrams, this time the Spark job having processed the data from the 3 apps pushes it back into them so that they know their current energy usage and can emit it on their request headers" src="{{ site.github.url }}/dhope/assets/sustainability_part2/monitor_feedback.svg" />
 
 #### CI/CD Pipeline tooling
-Multiple application services can be easier in the test environment or pipeline: you can make use of a tool like Docker Compose or Kubernetes (tiny or single machine)  to spin up all the necessary components on well understood hardware. Within a test you have the flexibility put both single request types through or a blend. See Green Coding Tool for a tool that provides an extended Docker Compose interface to do exactly this. Bear in mind:
+Multiple application services can be easier in the test environment or pipeline: you can make use of a tool like Docker Compose or Kubernetes (tiny or single machine)  to spin up all the necessary components on well understood hardware. Within a test you have the flexibility put both single request types through or a blend. See [Green Coding Tool](https://www.green-coding.io/projects/green-metrics-tool/) for a tool that provides an extended Docker Compose interface to do exactly this. Bear in mind:
 
  * Some components may need to be mocked out when outside of your control or not relevant to the NFR – this is fine so long as explicit and known.  
  * Real systems that run as clusters may behave differently to small machine examples (i.e. not just a simple multiplier) so some accuracy is being sacrificed for the ease of the test.
@@ -196,12 +196,12 @@ Think about NFRs such as:
 * Emissions per request to POST /account should be y gCO2
 A typical web service implementation might look like:
 
-<img class="none" alt="Sketch of a web service with a load balancer going to a web server to an app that then calls another app and also makes use of a database" src="../dhope/assets/sustainability_part2/web_service.svg" />
+<img class="none" alt="Sketch of a web service with a load balancer going to a web server to an app that then calls another app and also makes use of a database" src="{{ site.github.url }}/dhope/assets/sustainability_part2/web_service.svg" />
 
 where we see that the handling of a request is not just the job of one component but can be a variety including load balancers (LB), web servers, databases and other applications. 
 Assume you have no control over “Other app” and it doesn’t give any energy data in response headers and you don’t have visibility of the LB and so in some explicit demarcation points and focus on the remaining green boxes:
 
-<img class="none" alt="Sketch of a web service with a load balancer going to a web server to an app that then calls another app and also makes use of a database. In this case the load balancer and other app are greyed out" src="../dhope/assets/sustainability_part2/web_service_scoped.svg" />
+<img class="none" alt="Sketch of a web service with a load balancer going to a web server to an app that then calls another app and also makes use of a database. In this case the load balancer and other app are greyed out" src="{{ site.github.url }}/dhope/assets/sustainability_part2/web_service_scoped.svg" />
 
 #### Pipeline
 A pipeline test could be done as described above for a multi-app service, e.g. using Docker Compose or similar and put through the blend of request types that is relevant to the NFR and capturing the energy used. 
@@ -215,7 +215,7 @@ Given HTTP, gRPC etc requests are synchronous you may also be able to put very r
 ### Workflow energy NFRs
 A workflow here is some set of tasks that must be completed to do a piece of work, usually by multiple systems, e.g. to handle a user’s insurance application or to clean and transform data. They may or may not be orchestrated and many workflow types will spend a lot of time waiting for manual entry before they can proceed.
 
-<img class="none" alt="A sketch of a workflow using 3 services that each emit data and with an orchestrator above providing instructions" src="../dhope/assets/sustainability_part2/workflow.svg" />
+<img class="none" alt="A sketch of a workflow using 3 services that each emit data and with an orchestrator above providing instructions" src="{{ site.github.url }}/dhope/assets/sustainability_part2/workflow.svg" />
 
 A workflow NFR might be:
 * Processing a user’s application through all stages and systems use < N gCO2
@@ -251,7 +251,8 @@ In prod you need to know:
 This can be provided via metrics associated with the job which when combined with energy usage information, captured by the methods described earlier will provide the energy used by the complete job. 
 
 ### Web page energy NFRs
-If you have an NFR around a web page’s energy usage then capturing this in the build process should be relatively easy as Firefox browser provides energy measurement using RAPL. See Blog about Firefox. 
+If you have an NFR around a web page’s energy usage then capturing this in the build process should be relatively easy as Firefox browser provides energy measurement using RAPL. See this [Blog about Firefox](https://fershad.com/writing/co2e-estimates-in-firefox-profiler).
+
 There’s isn’t an equivalent production monitoring option here: everyone’s browser, machine and habits will differ and you don’t know the source of a user’s electricity. That said there is no major difference here either between prod and test in the sense we don’t have to worry about local vs scaled cluster resources, it’s more just averaging our energy numbers across different laptop and browser types, e.g. ARM vs Intel chips. 
 
 ## Conclusions
