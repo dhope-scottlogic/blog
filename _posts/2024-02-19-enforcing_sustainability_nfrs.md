@@ -22,7 +22,7 @@ Just as a quick recap, some sustainable NFRs are:
  * “Resources should not use energy when inactive”, i.e. scale down when you can
 
 ## What do we want to achieve
-In software architecture we sometimes talk about fitness functions and these are about ensuring a system meets its non-functional requirements. The aims of these functions are to ensure:
+In software architecture we sometimes talk about [fitness functions](https://nealford.com/downloads/Evolutionary_Architecture_Keynote_by_Neal_Ford.pdf) and these are about ensuring a system meets its non-functional requirements. The aims of these functions are to ensure:
 
  1.	NFRs are achieved on initial launch of a system or component
  2.	NFRs continue to be achieved over time as changes happen to the system
@@ -92,7 +92,7 @@ First of all, assume that energy can be used as a proxy for CO2 so and the remai
 Be careful here to consider test consistency for reporting and checking you are running in a low carbon region you care about the carbon  but additionally you want a constant value so you can see if your code is causing greater emissions rather than the grid. 
 
 ### Onboard vs offboard
-Where observing energy in a real system you may have what I call onboard vs offboard measurements. With onboard an app is provided at runtime with all the data it needs to get it’s energy usage as it runs and/or handles requests. With this information it can actually insert energy data into response headers or message metadata for the benefit of the upstream caller or downstream consumer respectively. 
+When monitoring energy in a real system you may use one of what I call onboard vs offboard measurements. With onboard an app is provided at runtime with all the data it needs to get it’s energy usage as it runs and/or handles requests. With this information it can actually insert energy data into response headers or message metadata for the benefit of the upstream caller or downstream consumer respectively. 
 
 The alternative I call offboard is where this info is not available to the running app and so various metrics are aggregated externally. E.g. where a container app doesn’t know if it’s on ARM or some Xeon chip you’d need the offboard processing and also where an NFR is about the aggregate across many VM/Container/Function instances and each instance only knows about itself. 
 
