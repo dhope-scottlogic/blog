@@ -22,7 +22,7 @@ To set the scene see the diagram below of an imaginary financial trading applica
 
 There's lots of data flying around varying from real time pricing data to instructions to execute trades. I've coloured the data entities according to their types and we see there's a few different patterns like events and state which we'll discuss in a moment.   
 
- The data bus isn't shown in the diagram because the discussion in this blog is relatively independent of which you pick. You might imagine, for example, that those with "event" in the title like Azure Eventgrid and AWS Eventbridge are only for events but the reality is that most data buses support payloads of 256kB or more meaning you can be flexible in what you send.  
+ The data bus isn't shown in the diagram because the discussion in this blog is relatively independent of which you pick. You might imagine, for example, that those with "event" in the title like Azure Eventgrid and AWS Eventbridge are only for events but the reality is that most data buses support payloads of 256kB or more meaning you can be flexible in what you send in any technology.  
 
  
 ## Terminology and types of data
@@ -37,7 +37,7 @@ To begin I think it's useful to classify the different types of message we might
     <td>Events</td>
     <td><ul>
       <li> User Created (ID=55)</li>
-      <li> A cloud event like "ECS instance 343 started" </li>
+      <li> ECS instance started (ID=353) </li>
     </ul></td>
   </tr>
   <tr>
@@ -130,7 +130,7 @@ The following table summarises the differences:
   </tr>
   <tr>
     <td>Followup calls</td>
-    <td>Yes, API request needed</td>
+    <td>Yes, API call needed</td>
     <td>No</td>
   </tr>
   <tr>
@@ -157,7 +157,7 @@ As the consumer volume goes up the advantage of the stateful approach is that yo
 Relating to the number of consumers, if your API is not that reliable then the stateful option can be better for resilience because you don't have a dependency on both the message bus and the API, just on the message bus in order to get all the data. 
 
 #### Coupling
-A few points here like resilience are really a form of coupling. If a service must call another service's API to get data it is more closely coupled to that service than a state message solution where the consumer needs to know nothing about the producer and isn't dependent on it's name, resilience, API schema etc
+Resilience and some of the other points are really a form of coupling. If a service must call another service's API to get data it is more closely coupled to that service than a state message solution where the consumer needs to know nothing about the producer and isn't dependent on it's name, resilience, API schema etc
 
 #### Data Transfer Volumes
 If most consumers only want 2 or 3 fields but the state messages have 200 fields in them it can be wasteful. In this case an event option will be more efficient assuming the synchronous APIs (e.g. REST, GraphQL) are more fine grained. It's not a major plus for small focused state objects (e.g. 10-20 fields) but more important if sending large chunks of data around going into the 10s of kBs.
@@ -175,11 +175,11 @@ Sometimes I've heard people assert that a state message is simpler because there
 
 On the other hand if you had a single event saying "email changed" (with the new email on the event or available via API) then the processing service can be stateless.
 
-In this case the consumer is actually much simpler with events but it can be negated via a change list. 
+In this case the consumer is actually much simpler with events but the problem for state messages can be negated by including a change list. 
 
 #### Schema management
-You have to keep 2 schemas in sync for the stateful approach (REST and message) and a lot of messaging systems don't have good support for schema management compared to APIs. 
-This is true both in terms of providing a schema for developers, e.g. via Swagger/Open API but also in terms of enforcing what is allowed to go onto a queue. 
+You have to keep 2 schemas in sync for the stateful approach (REST and message) and a lot of messaging systems don't have good support for schema management compared to API framework s. 
+This is true both in terms of providing a schema for developers, e.g. via Swagger/Open API but also in terms of enforcing what producers are allowed to write onto a queue. 
 
 #### Aggregations
 This is addressed in a lot more detail in the upcoming Part 2 of this blog. 
@@ -202,10 +202,10 @@ The instruction message will typically contain all the necessary information for
 Now we've looked at instructions let's compare them to state and event messages. I would say the differences are:
 
  * A state or event message is quite generic and there could be a few services interested in it. 
- * A command is more specific and targetted at a particular consumer albeit with loose coupling. 
+ * A command is more specific and targetted at a particular consumer albeit with loose coupling (via queue or similar). 
  * With a command there is often an expectation of a response back via another message to confirm that it has been received and accepted or acted on. 
 
-My personal take on this is that best commands fit into a workflow where you want to keep coupling low but nonetheless you are requesting something to happen and you care that it does happen. You may want to be able to bring up on a dashboard the state of the user's order and its delivery and take action where there are problems and you don't want to have to pull data from numerous systems to get that view. Such a scenario often benefits from an orchestrator, e.g. something like Camunda or Uber Cadence or AWS Step Functions.
+My personal take on this is that commands best fit into a workflow where you want to keep coupling low but nonetheless you are requesting something to happen and you care that it does happen. You may want to be able to bring up on a dashboard the state of the user's order and its delivery and take action where there are problems and you don't want to have to pull data from numerous systems to get that view. Such a scenario often benefits from an orchestrator, e.g. something like Camunda or Uber Cadence or AWS Step Functions.
 
 With events/state messages then the source system (or an orchestrator) doesn't take any responsibility for what happens when it has done its work. It just throws out a message saying "here's some new/updated data" and moves on. It's up to other services to decide what to do and to provide a view on the status of the downstream actions. An obvious corollary of this is that where transmitting state, if any critical (to business function) downstreams depend on it then the messaging system must be very robust because there's no opportunity for retries or flagging errors in the source system. The source has no idea if downstreams got the data and successfully processed it. 
 
@@ -216,7 +216,7 @@ I am not going to say a lot here because the question of what to put in the mess
 * the value type(s) 
 * a timestamp. 
 
-The challenges are primarily around the message bus and the consumer. e.g. working out when all data has arrived in a given time period (See watermarks in [Streaming Systems](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-102/)) and finding the right balance between risk of data loss vs throughput and latency. But what to put in the message itself is not too difficult relatively speaking.
+The challenges are primarily around the message bus and the consumer. e.g. working out when all data has arrived in a given time period (See watermarks in [Streaming Systems](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-102/)) and finding the right balance between risk of data loss vs throughput and latency. But the question of what to put in the message itself is comparitively simple. 
 
 ## Message envelopes
 
@@ -227,28 +227,29 @@ A few recommendations are:
 
 ### IDs
  Include a unique ID on a message regardless of whether it's state, command etc. I'd advise UUIDs to guarantee uniqueness. This ID should just be about the message and not the entity. This is useful because:
+
  * for a command an action may not be idempotent, e.g. sending an email is not idempotent and so you must be able to de-duplicate
  * even for state which ideally is idempotent, it's better to avoid duplicating work in consumers and so having an ID to check against makes this easy
 
 
 ### Timestamps
- * Include a timestamp in a standard UTC form so that a consumer can reorder messages and be clear about what the timestamp means. I'd recommend this being based on the entity being written to the source database (where applicable) or processed, not the message send time which in a threaded system may be non-deterministic. 
+Include a timestamp in a standard UTC form so that a consumer can reorder messages and be clear about what the timestamp means. I'd recommend this being based on the entity being written to the source database (where applicable) or processed, not the message send time which in a threaded system may be non-deterministic. 
 
 On the format, it's debatable but I prefer string versions of the timestamp as it makes debugging easier without having to convert epoch values. e.g. 2024-02-19T12:18:07.000Z, not 1708344420000.
 
 ### Versioning
-Have a plan for versioning which could be in verion field or be part of the message type name if you want to be able to route different versions to different consumers easily.
+Have a plan for versioning which could be in version field or be part of the message type name if you want to be able to route different versions to different consumers easily.
 
 Don't confuse the version for the message envelope (shared across many entities) and the version for the specific entity. It's fine to have 2 version numbers, one for each. 
     
 ### Testing and environments
-It'd worth allowing for testing and multiple environments in your messages. 
-For example, consider a flag to say if a message is a test one. This will allow easy filtering of test data in prod without polluting your analytics systems
+It's worth allowing for testing and multiple environments in your messages. 
+For example, consider a flag to say if a message is a test message. This will allow easy filtering of test data in prod without polluting your analytics systems
 
-Also consider a environment flag. It is common to flow production data into test environments so as to provide realistic data. Sometimes you'll want to know about this because, coming from prod, referenced IDs won't exist so a flag let's you know this came from anther environement and not all linked data may have flowed with it
+Also consider a environment flag. It is common to flow production data into test environments so as to provide realistic data. Sometimes you'll want to know about this because, coming from prod, referenced IDs won't exist so a flag let's you know this came from anther environment and not all linked data may have flowed into that test environment.
 
 ### Example
- As an example:
+As an example of a message with the above fields:
 
 <pre>
 <code>
@@ -280,7 +281,7 @@ On state and events specifically, I'm not sure there's ever a 100% preferred app
 
  Nonetheless events do mean tighter coupling between services and won't always scale if consumer numbers are high.
 
-Whatever you go for, have a clear plan. try and make it consistent and logical and don't go into it accidentally. Don't randomly mix instructions, state and events within a service without any clear reasoning.  That said, don't try and have a one size fits all enterprise wide pattern. Even in a single domain it may be fine to have one service emitting state and another service listening to that and sending commands to do specific things when the data changes. 
+Whatever you go for, have a clear plan, try to be consistent and logical and don't make a choice accidentally. Put another way don't randomly mix instructions, state and events within a service without any clear reasoning. This doesn't mean you should try and have a one size fits all enterprise wide pattern. Even in a single domain it may be fine to have one service emitting state and another service listening to that and sending commands to do specific things when the data changes.
 
 In part 2 I'll go into more detail on state messages looking at how to pick the right granularity for the data. 
 
