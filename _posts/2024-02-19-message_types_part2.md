@@ -14,17 +14,17 @@ author: dhope
 
 In part 1 I compared various message types including events, state transfer, commands and time series data. I discussed the key characteristics of each and when and where to use each type but I didn't go into depth on the data you might pack into those messages so that's what I am going to talk about here.  
 
-The design of message payloads is an important topic that I don't think is given as much time and thought as it should be. In the relational database world a lot of thought is given to the schema design, to getting the right entities, the right level of normalisation and the correct relationships between tables. My experience is that we do a lot less of this in service to service messaging and so I'll try give this some attention including looking at some of the complications that occur and topics like granularity, normalisation and enrichment pipelines. 
+The design of message payloads is an important topic that I don't think is given as much time and thought as it should be. In the relational database world a lot of thought is given to the schema design, to getting the right entities, the right level of normalisation and the correct relationships between tables. My experience is that we do a lot less of this in service-to-service messaging and so I'll try give this some attention including looking at some of the complications that occur and topics like granularity, normalisation and enrichment pipelines. 
 
 ## Granularity
 
-To understand what I mean by granularity consider the following diagram for a made up example of user services:  
+To understand what I mean by granularity consider the following diagram for a made up example of 2 user related services for a music streaming app:  
 <img class="none" style="max-width: 600px" alt="TODO" src="../dhope/assets/messagetypes_p2/granularity2.svg" />
 
-There's a core profile service and then another for storing more application specific preferences. The core profile service has a separate email change endpoint as this comes with extra logic around validation and security. 
-Nonetheless the profile service puts out a single message including all profile data for convenience. Similarly for convenience, between the two services there is an aggregation component producing messages for consumers that have everything about the user. Think of it as a big like using Graph QL to get all your related user data in one go in a synchronous API.
+There's a core profile service and then another for storing more domain specific preferences. The core profile service has a separate email change endpoint as this comes with extra logic around validation and security. 
+Nonetheless the profile service puts out a single message including all profile data for convenience. Similarly for convenience, between the two services there is an aggregation component producing messages for consumers that have everything about the user. Think of it as a bit like using Graph QL to get all your related user data in one go in a synchronous API.
 
-e.g. we have the following 2 entities coming from the services:
+e.g. we have the following 2 entities coming from the respective services:
 <table>
   <tr>
     <td>
@@ -98,42 +98,51 @@ e.g.
 </code>
 </pre>
 
+<pre>
+<code>
+      {
+         "Entity": "Address"
+         "ProfileID": "8c0fd83f",
+         "number": "45",
+         "postcode": "AA1 1AA"
+      }
+</code>
+</pre>
+etc
+
 Breaking this down, there's 3 decision points here where specific choices around granularity have been made:
- 1. Should each endpoint send out an event matching the endpoint payload
-    * or should divide it into smaller messages for particular field sets
-       * e.g. a message per preference type rather that one preferences message
- 2. Should one endpoint aggregate into its messages data that has come from another endpoint
-    * e.g. profile contains the email
- 3. Should multiple messages (from multiple systems) be aggregated before they reach consumers
+ 1. Should each endpoint send out an event matching the endpoint payload or should divide it into smaller messages for particular field sets
+ 2. Should one endpoint aggregate into its messages data that has come from another endpoint on the same service
+ 3. Should multiple messages (from multiple services) be aggregated before they reach consumers
 
 I'll describe these in a bit more detail before moving on to the advantages and pitfalls. 
 
 ### Endpoint to message mapping
-Let's say there is a single update profile REST endpoint, e.g. PUT /profile where the XML/JSON payload includes an email, postal address, phone number etc. (i.e. no separate email endpoint for now)
+Let's say there is a single update profile REST endpoint, e.g. PUT /profile where the XML/JSON payload includes an email, postal address, phone number etc. (assume no separate email endpoint for now)
 
 When generating a message there is a choice between
- 1. sending out one "PROFILE UPDATED" event or state message
- 2. sending out separate ones like "EMAIL_CHANGED", "ADDRESS_CHANGED" etc 
-    * an address itself could divde down to postcode, number etc although this wouldn't make a lot of sense as the fields change together. 
-    * bear in mind that a PUT to the endpoint may provide a new version of all fields or more likely in UI use cases just a few related fields may change, e.g. house number and postcode
+ 1. sending out one  "PROFILE" state message (or "PROFILE UPDATED" event)
+ 2. sending out separate ones like "EMAIL", "ADDRESS" etc 
 
 In the first a consumer system that only cares about the email doesn't know if the email changed or not without doing a comparison because maybe the postcode changed or some other field. They may end up processing a large volume of messages unnecessarily if some other field regularly changes that they don't care about. Functionally this may be fine but it won't help non-functions around cost and energy. Change lists can reduce the effort but see later discussion. 
 
 In the second option a consumer will subscribe to particular fields they are interested in but there will be more messages when multiple fields change at the same time. 
 
+Note that an address itself could divde down to postcode, number etc although this wouldn't make a lot of sense as the fields should always change together. <s>To that point, bear in mind that a PUT endpoint may provide a new version of all fields or just a few. Particularly for user facing services API design can end up UI dependent (which is a whole other topic) where the API matches the fields in a form. What works for the user doesn't always work for downstream consumers. </s>
+
 ### Aggregation across endpoints
 
 Next let's think about the scenario shown in the diagram with a separate endpoint for changing the email (we'll ignore complexities of changing email and assume one PUT). 
-We could send a EMAIL_CHANGED state message and a PROFILE_UPDATED one (without the email) when the profile endpoint is hit. But... wouldn't a consumer expect to find an email in a profile message. If we find that persuasive then we might just send a "PROFILE UPDATED" message including the email when either endpoint is hit so the consumer has one simple message to listen for regardless of how the change occurred. 
+We could send a EMAIL_CHANGED state message and a PROFILE_UPDATED one (without the email) when the profile endpoint is hit. But... wouldn't a consumer expect to find an email in a profile message? If we find that persuasive then we might just send a "PROFILE UPDATED" message including the email when either endpoint is hit so the consumer has one simple message to listen for regardless of how the change occurred. 
 
 Such an approach makes good sense but comes with some consistency risks that'll we'll discuss shortly
 
 ### Aggregation across services
-Finally we may choose to aggregate multiple messages before delivery to a set of consumers. This, as we'll see can simplify consumers as they get all the data they want in one single message but it too has some costs around consistency. 
+Finally we may choose to aggregate multiple messages before delivery to a set of consumers. This, as we'll see, can simplify consumers as they get all the data they want in one single message but it too has some costs around consistency. 
 
 ## Normalisation
 As well as granularity there is also the question of normalisation, and how much data we duplicate across messages. 
-Consider an application processing sports data. Imagine there is a separate state messge for a tournament, a fixture and a team amongst other entities. 
+Picking a different example, consider an application processing sports data. Imagine there is a separate state messge for a tournament, a fixture and a team amongst other entities. 
 
 If messages were normalised then each of these would have distinct unique data and there only connections would be via IDs. e.g.
 
@@ -179,7 +188,7 @@ If messages were normalised then each of these would have distinct unique data a
 </code>
 </pre>
 
-However, relating to the aggregation point described already, it might be convenient for consumers if the fixture message included within it information about the teams like the team names and the tournament name. In this case we see the same data duplicated across multiple messages.
+However, relating to the aggregation point described already, it might be convenient for consumers if the fixture message included within it information about the teams like the team names and the tournament name. In this case we see the same data duplicated across multiple messages with tournament data in fixture and standalone messages:
 
 <pre>
 <code>
@@ -210,10 +219,10 @@ However, relating to the aggregation point described already, it might be conven
 </code>
 </pre>
 
-This is a form of aggregation but the distinguishing features relating to the earlier examples are:
+This is a form of aggregation but the distinguishing features of this example compared to the earlier ones are:
 
- 1.  That we have still included the distinct messages as well as the aggregated, e.g. tournament exists as its own message as well as within each fixture.  This means that we have 2 sources of truth, a point we'll come back to. 
- 2. There is a many to one relationship where for one tournament there are many fixtures which is a common scenario in relational database table design. 
+ 1.  Having both the distinct messages as well as the aggregated ones, e.g. tournament exists as its own message as well as within each fixture.  This means that we have 2 sources of truth, a point we'll come back to. 
+ 2. There is a many-to-one relationship where for one tournament there are many fixtures which is a common scenario in relational database table design. 
 
 <s>What's the cost of doing this? Well imagine that the sponsor changes and imagine that there are 200 fixtures in the tournament - at this point 200 messages are generated for the denormalised case when 1 would have been sufficient for the normalised one with separate distinct messages. </s>
 
@@ -221,9 +230,10 @@ This is a form of aggregation but the distinguishing features relating to the ea
 Now we'll have a look at the different features and tradeoffs you'll need to consider when deciding on a data model for your messages. 
 
 ### Message volumes
-If finer grained messages are used, e.g. one for email, one for phone number, one for postal address etc rather than a single *profile* message then it seems pretty obious that there's going to be a lot more messages sent. However it isn't quite that simple; at the producer there's less messges for sure, but what if a service is only interested in a single field. 
+TODO - maybe point back to earlier blog
+If finer grained messages are used, e.g. one for email, one for phone number, one for postal address etc rather than a single *profile* message then it seems pretty obvious that there's going to be a lot more messages sent. However it isn't quite that simple; at the producer there's less messges for sure, but what if a service is only interested in a single field. 
 
-If we had the very specific message types then a consumer would be able to subscribe to the specific type and never have anything pushed to them that they aren't interested in. 
+If we had the very specific message types then a consumer would be able to subscribe to the specific type and never have anything pushed to them that they aren't interested in - a point we touched on in the preivous blog post
 
 Going back to our example at the start with preferences and the profile, assume the following statements are true:
  * user preferences changes a lot but email doesn't. 
@@ -252,7 +262,7 @@ message: {
 If one message has the latest profile but older user preferecces and the next the latest preferences but older profile then you've got a problem! You could at least add versioning or timestamps at the level of the sub-entities but consumers must be aware of this. 
 
 Such a scenario can occur both within a service or when aggregating messages from multiple services. 
-For the former imagine that the preferences and the email endpoints are hit in quick succession from a client but go to 2 different instances of the application. Each may read an old version of the data from the other endpoint when providing the full profile message. This is a strong reason not to aggregate within a service where you can't guarantee linear ordering in the reads and writes all the way through to the message.
+For the former imagine that address and email endpoints are hit in quick succession from a client but go to 2 different instances of the application providing the service. Each may read an old version of the data from the other endpoint when providing the full profile message. This is a strong reason not to aggregate within a service where you <em>can't guarantee linear ordering in the reads and writes all the way through to the message.</em>
 
 On a related point use a timestamp from the DB not when you send a message, otherwise if one sending thread runs slow it'll look like the later message but have older data.  
 
@@ -281,7 +291,7 @@ When a consumer receives a message like:
    }
 </code>
 </pre>
-how does it know which field or fields actually changed? In short it doesn't unless it does a field by field diff with its own data store. Why might this matter, well consider the case where you want to send an email as a security message if the email changes but not if it was the other fields. 
+how does it know which field or fields actually changed? In short it doesn't unless it does a field-by-field diff with its own data store. Why might this matter, well consider the case where you want to send an email as a security message if the email changes but not if it was the other fields. 
 
 Two solutions are:
 

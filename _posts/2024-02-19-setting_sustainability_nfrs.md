@@ -22,54 +22,10 @@ It introduces NFRs generally and examines why we don't typically set them for su
 
 With this blog I aim to give some practical advice that will make it easier to get into the habit of including measures that will adress carbon emissions when writing NFRs.
 
-## Principles for setting carbon emission NFRs
-Now we’ve said why it’s tricky, let’s try and see how we can improve the situation and set useful NFRs. Firstly, we need to make our aims a bit more concrete.
+I'll start with a quick recap of what I think the key considerations are when writing an NFR and then move to carbon specifics. 
 
-### What are we actually trying to reduce?
-Before you say carbon emissions, remember that in technology there are many sources of those emissions. When setting NFRs we should be sure to think about all of these, especially where our organisation’s targets include Scope 3 emissions like the manufacture of servers. See the [Scott Logic proposed carbon standard](https://www.techcarbonstandard.org/) for a summary: 
-
-<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/tech_carbon_standard.png" />
-
-Typically, each NFR will target a different category, e.g. one NFR may be about employee laptop refreshes and thus Category U, and another about running more efficiently on a user’s browser, targeting Category D. All emissions are important but different people and teams can impact different categories.
-
-### Direct vs indirect NFRs
-I’d argue that  when writing sustainability and carbon NFRs we have 2 classes of NFR: direct and indirect. i.e. we can directly address carbon emissions or target some other indirect measure that when optimised also reduces emissions.  For example, a target value of server utilisation will also benefit emissions.  Both types of NFR bring value and indirect may be more manageable as a starting point before you get good at measurement.
-
-### Getting a business steer – top-down targets
-NFRs are designed to ensure the software or hardware meets business or regulatory needs. For example, an availability number is about the cost to reputation or lost sales if a website or API is offline. 
-
-To see how this can work for CO2 emissions consider an example where an organisation has pledged to reduce its Scope 2&3 emissions by 10% over 2 years. This may be divided up across the company evenly (10% everywhere) or unevenly according to the ease of making improvements and the sizes of departments. A similar exercise may be done at different levels cascading down all the way to individual teams and/or services. 
-
-<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/nfrs_push_down.svg" />
-
-In this case the subscriptions team will get a carbon budget from their existing emissions and the 10% reduction requirement. Observe that cost and carbon NFRs encourage decommissioning as new components will eat into the existing and falling budget.
-
-### Setting realistic numbers
-Targets from above work well for a % improvement but can be more challenging for a new service or when trying to work out where to focus efforts. You may not have a good feel for the problem, for what’s ambitious but realistic and so can’t quickly assign a number like say 100ms latency or 1-year data retention. In this situation I'd say the preferred options are:
-
- * Find something similar that already exists and come up with a relative number
- * Do a spike
-
-Obviously coming up with a relative number requires some ability to measure and understand your existing services in terms of energy and carbon emissions so getting this sorted may be a pre-requisite to setting more mature direct NFRs. 
-
-A spike will allow a rough approximation of the right figure, e.g. energy or CO2 per user request without doing significant development. With a spike, you avoid all the complexities of writing proper infra-as-code, tests, robust error handling, carefully managed metrics etc and can just get a feel for how the main business logic may run and how much energy it should use. 
-
-Over time, this should become easier if knowledge is built up and shared (both within and between companies), leading to good case studies and examples.
-
-### Indirect NFRs
-
-When setting an indirect NFR you will find it useful to start with some solid principles, good examples of these are the Green Software Foundation Green Software Principles below:
-
-<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/green_software_principles.png" />
-
-These show us 3 different focus areas. Be aware that hardware efficiency and energy efficiency are related but distinct: efficient code can use less hardware but that depends on how efficiently you use the hardware, e.g. one server per app isn’t very efficient, even if the app is small and fast.  Hardware also takes account of how often you refresh hardware and how efficient its manufacturing was. 
-
-An improvement in emissions may often be met by more than one of these, e.g. you could double efficiency of code or run with electricity with half the carbon intensity. 
-
-One level down from this, you may have particular aims like making more use of serverless, reducing network chattiness or reducing the staff IT footprint; NFRs should flow from these objectives and promote them.  
-
-## Writing a good NFR
-This could really be the topic of a few blog posts itself but let’s consider a few quick points before diving into some examples. 
+## Setting good NFRs
+This could really be the topic of a few blog posts itself but let’s consider a few quick points that are relevant for what follows.
 
 ### Quantitative vs qualitative
 NFRs are sometimes a measurable number and sometimes more descriptive:
@@ -101,12 +57,56 @@ Quantitative is preferred over qualitative so that there is something to aim for
 Qualitative ones will sometimes need discussion as to what the intent is and whether an implementation plan meets it. 
 
 ### Scale factor
-With many NFRs, it is sensible to put in a scale factor, otherwise growth in the company may cause the numbers to be exceeded. 
-My recommendation would be that per-user targets are used as well as per-request ones where appropriate, (e.g. API design) in order to encourage sensible design that minimises the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if ten requests are needed where one may have been sufficient. 
+With some NFRs, it is sensible to put in a scale factor, otherwise growth in the company may cause the numbers to be exceeded. 
+My recommendation would be that per-user targets are used where possible, in order to encourage sensible design that minimises the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if ten requests are needed where one may have been sufficient. 
 
 ### Relevance
 NFRs should promote the important characteristics of a system and a project should not be overwhelmed with excessive numbers of NFRs, many of which are not important and provide a distraction. Similarly, NFRs should be appropriate in their asks and not unnecessarily difficult. 
 As an example, we don’t need to push tight carbon emissions per request for a service called a few times a day – it won’t have a useful impact on the wider company’s emissions. On the other hand, it might be useful to have an NFR that will flag up where systems are not being scaled down, e.g. average power of the service over a day or an NFR to check the average scaling of the service. 
+
+## Thinking about carbon emission NFRs
+After introding NFRs let's now think more about NFRs relating to carbon emissions
+
+### Sources of emissions
+It's important to remember that there's many sources of carbon and carbon equivalent emissions. When setting NFRs we should be sure to think about all of these, especially where our organisation’s targets include Scope 3 emissions like the manufacture of servers. See the [Scott Logic proposed carbon standard](https://www.techcarbonstandard.org/) for a summary: 
+
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/tech_carbon_standard.png" />
+
+Typically, each NFR will target a different category, e.g. one NFR may be about employee laptop refreshes and thus Category U, and another about running more efficiently on a user’s browser, targeting Category D. All emissions are important but different people and teams can impact different categories.
+
+### Direct vs indirect NFRs
+I’d argue that when writing sustainability and carbon NFRs we have 2 approaches: direct and indirect. We can directly address carbon emissions or target some other indirect measure that when optimised also reduces emissions such as server utilisation. You may find the latter easier initially as it doesn't require being able to measure energy and emissions accurately which can be difficult - I'll discuss this in my next NFRs blog. 
+
+For setting an indirect NFR I'd recommend starting with the Green Software Foundation Green Software Principles below:
+
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/green_software_principles.png" />
+
+These show us 3 different focus area: energy efficency, amount of hardware (which has manufacturing emissions) and the electricity carbon intensity. Note that being energy efficient may also benefit hardware in that you need less of it. 
+
+An improvement in emissions may often be met by more than one of these, e.g. you could double efficiency of code or run with electricity with half the carbon intensity. 
+
+One level down from this, you may have particular aims like making more use of serverless, reducing network chattiness or reducing the staff IT footprint; NFRs should flow from these objectives and promote them.  
+
+### Carbon emissions drivers
+
+NFRs are designed to ensure the software or hardware meets business or regulatory needs. For example, an availability number is about the cost to reputation or lost sales if a website or API is offline. There isn't typically an equivalent for CO2 at the moment as carbon reporting is very much in its infancy for tech firms so I suspect the drive to reduce emisssions will come more from engineering teams trying to do the right thing. 
+
+That said, longer term, as regulations increase and carbon emissions come with financial cost I'd expect this to change and there'll be more top down targets to hit. e.g. an organisation pledges to reduce its Scope 2&3 emissions by 10% over 2 years and this cascades down through departments with proportions of that 10% given to each: 
+
+<img class="none" alt="" src="{{ site.github.url }}/dhope/assets/sustainability_part1/nfrs_push_down.svg" />
+
+Observe that carbon (and cost) NFRs encourage decommissioning as new components will eat into the existing and falling budget unless something is removed at the same time.
+
+
+### Choosing values for your NFRs
+For the direct NFRs, if you have an existing service then you can just target an x% reduction, well provided you can measure you existing emissions which is a pre-requisite.  When you are starting something new it can be trickier as you may not have a good feel for the problem and be able to quickly assign a number like say 100ms latency or 1-year data retention. In this situation I'd say the preferred options are:
+
+ * Find something similar that already exists and come up with a relative number
+ * Do a spike
+
+A spike will allow a rough approximation of the right figure, e.g. energy or CO2 per user request without doing significant development. With a spike, you avoid all the complexities of writing proper infra-as-code, tests, robust error handling, carefully managed metrics etc and can just get a feel for how the main business logic may run and how much energy it should use. 
+
+Over time, this should become easier if knowledge is built up and shared (both within and between companies), leading to good case studies and examples.
 
 ## NFR Examples and Suggestions
 In this section, I’ll present some ideas for NFRs that promote carbon sustainability and then in later sections discuss how to arrive at these. 
