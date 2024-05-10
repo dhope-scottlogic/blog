@@ -13,7 +13,7 @@ author: dhope
 
 Until now, the non-functional requirements that have driven our architecture and development decisions have focused on areas like performance, security and resiliency, with scant consideration for the environmental impacts of these choices. 
  
-In the face of the increasing global temperatures, the technology sector must now take action to address this imbalance – particularly as the proportion of global carbon emissions deriving from ICT is currently expected to rise from 4% to 14% by 2040.
+In the face of the increasing global temperatures, the technology sector must now take action to address this imbalance – particularly as the [proportion of global carbon emissions deriving from ICT is currently expected to rise from 4% to 14% by 2040](https://www.sciencedirect.com/science/article/abs/pii/S095965261733233X).
  
 In this blog post, I focus on how to set sustainability NFRs so that you have a carbon or efficiency target alongside your security and availability targets. Sustainability is a wide topic, [as my colleague Oliver Cronk explained in this post](https://blog.scottlogic.com/2023/10/26/conscientious-computing-facing-into-big-tech-challenges.html); I’ll accordingly concentrate on CO2 emissions as this is an area that developers can influence directly, unlike an area such as water usage which is largely in the control of the data centre provider.   
  
@@ -53,19 +53,19 @@ NFRs are sometimes a measurable number and sometimes more descriptive:
   </tr>
 </table>
 
-Quantitative is preferred over qualitative so that there is something to aim for, test for and validate against. Quantitative may be absolute or relative, with the former preferred but the latter may be simpler initially when aiming for improvement. The "scale horizontal" item above might be better expressed as, "service can scale linearly in cost and resources with request per second numbers between 0 and 2m". 
-Qualitative ones will sometimes need discussion as to what the intent is and whether an implementation plan meets it. 
+If possible, quantitative is preferred over qualitative so that there is something to aim for, test for and validate against. The "scale horizontal" item above might be better expressed as, "service can scale linearly in cost and resources with request per second numbers between 0 and 2000". 
+In the absence of a number you can measure qualitative ones will sometimes need discussion as to what the intent is and whether an implementation plan meets it. 
 
 ### Scale factor
 With some NFRs, it is sensible to put in a scale factor, otherwise growth in the company may cause the numbers to be exceeded. 
-My recommendation would be that per-user targets are used where possible, in order to encourage sensible design that minimises the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if ten requests are needed where one may have been sufficient. 
+My recommendation would be that per-user targets are used where possible for carbon emissions, in order to encourage sensible design that minimises the emissions in serving each user. Remember that it’s great if a single request generates low emissions but not if ten requests are needed where one may have been sufficient. 
 
 ### Relevance
 NFRs should promote the important characteristics of a system and a project should not be overwhelmed with excessive numbers of NFRs, many of which are not important and provide a distraction. Similarly, NFRs should be appropriate in their asks and not unnecessarily difficult. 
 As an example, we don’t need to push tight carbon emissions per request for a service called a few times a day – it won’t have a useful impact on the wider company’s emissions. On the other hand, it might be useful to have an NFR that will flag up where systems are not being scaled down, e.g. average power of the service over a day or an NFR to check the average scaling of the service. 
 
-## Thinking about carbon emission NFRs
-After introding NFRs let's now think more about NFRs relating to carbon emissions
+## Thoughts on how to address carbon emissions via NFRs
+After introding NFRs generally let's now think more about carbon emissions and how NFRs might help reduce them. 
 
 ### Sources of emissions
 It's important to remember that there's many sources of carbon and carbon equivalent emissions. When setting NFRs we should be sure to think about all of these, especially where our organisation’s targets include Scope 3 emissions like the manufacture of servers. See the [Scott Logic proposed carbon standard](https://www.techcarbonstandard.org/) for a summary: 
@@ -84,8 +84,6 @@ For setting an indirect NFR I'd recommend starting with the Green Software Found
 These show us 3 different focus area: energy efficency, amount of hardware (which has manufacturing emissions) and the electricity carbon intensity. Note that being energy efficient may also benefit hardware in that you need less of it. 
 
 An improvement in emissions may often be met by more than one of these, e.g. you could double efficiency of code or run with electricity with half the carbon intensity. 
-
-One level down from this, you may have particular aims like making more use of serverless, reducing network chattiness or reducing the staff IT footprint; NFRs should flow from these objectives and promote them.  
 
 ### Carbon emissions drivers
 
@@ -386,7 +384,7 @@ When not experienced in this area, it may be best to focus NFRs on ensuring good
 
 Remember to include both training and execution where the former may be one-off and amortised, or more likely require updates at a cadence which could be anything from hourly to monthly.  
 
-If you want a sensible target number and don’t have a target from the business then existing knowledge or spikes may be used to estimate the amount of training needed and model execution energy. Estimation of training effort (resources and time) is especially challenging – it’s not like serving a web request repeatedly. It’ll vary significantly on the amount of data, how much pre-processing that data needs, the number of features, layers of a neural net etc. Still, there is some guidance and tooling available, for example see [How to Estimate the Time and Cost to Train a Machine Learning Model](https://towardsdatascience.com/how-to-estimate-the-time-and-cost-to-train-a-machine-learning-model-eb6c8d433ff7)  and the referenced [training cost calculator](https://github.com/aipaca-mlops/ML-training-cost-calculator) tool. I’d suggest starting with quite loose requirements and then designing in iterations with tighter NFRs on later ones, with the exception of any huge GPT-style training where you might want to know in advance how much carbon it’ll create as it’ll blow your carbon budget just doing the training. 
+If you want a sensible target number and don’t have a target from the business then existing knowledge or spikes may be used to estimate the amount of training needed and model execution energy. Estimation of training effort (resources and time) is especially challenging – it’s not like serving a web request repeatedly. It’ll vary significantly on the amount of data, how much pre-processing that data needs, the number of features, layers of a neural net etc. Still, there is some guidance and tooling available, for example see [How to Estimate the Time and Cost to Train a Machine Learning Model](https://towardsdatascience.com/how-to-estimate-the-time-and-cost-to-train-a-machine-learning-model-eb6c8d433ff7)  and the referenced [training cost calculator](https://github.com/aipaca-mlops/ML-training-cost-calculator) tool. I’d suggest starting with quite loose requirements and then requiring reduction by a percentage on later iterations, the exception being any huge GPT-style training where you might want to know in advance how much carbon it’ll create as it’ll blow your carbon budget (and cost) just doing the training. 
 
 For a training batch job that isn’t real-time, greater flexibility is possible in terms of when and where the workload is run, which allows lower estimates for the carbon intensity; this should accordingly make it a key focus area as an easy thing to target with NFRs.
 

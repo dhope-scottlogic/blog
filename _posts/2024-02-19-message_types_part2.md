@@ -230,19 +230,10 @@ This is a form of aggregation but the distinguishing features of this example co
 Now we'll have a look at the different features and tradeoffs you'll need to consider when deciding on a data model for your messages. 
 
 ### Message volumes
-TODO - maybe point back to earlier blog
-If finer grained messages are used, e.g. one for email, one for phone number, one for postal address etc rather than a single *profile* message then it seems pretty obvious that there's going to be a lot more messages sent. However it isn't quite that simple; at the producer there's less messges for sure, but what if a service is only interested in a single field. 
 
-If we had the very specific message types then a consumer would be able to subscribe to the specific type and never have anything pushed to them that they aren't interested in - a point we touched on in the preivous blog post
+A similar argument applies here as discussed in (TODO add link) part 1 for events vs state: if finer grained messages are used, e.g. one for email, one for phone number, one for postal address etc rather than a single *profile* message then it seems pretty obvious that there's going to be a lot more messages sent from the producer. However where there is a large fan out to consumers, if each consumer is only interested in one or two fields then the larger message results in a lot more unncessary deliveries. 
 
-Going back to our example at the start with preferences and the profile, assume the following statements are true:
- * user preferences changes a lot but email doesn't. 
- * most services do care if the email changed but not someone's preferences
-
-In this case, if we had a single aggregated message then all consumers would receive an update when the preferences change even though they don't care! So although there's less producer messages with the aggregation, after fan out there could actually be more messages delivered overall to consumers
-
-#### Fan out
-Let's look back to the normalisation example a short while ago - imagine what happens if the tournament sponsor changes and this needs reflecting on all upcoming fixtures. With the normalised data, where the fixtures only have an ID, then a single message is sent out with the new tournament sponsor. On the other hand, if the tournament data is also included in all the fixture messages (for consumer convenience) then all those fixtures must be sent again. If there's hundreds of fixtures against a tournament, that's a lot of extra messages that need to be delivered and they'll all come in a burst which may impact other functionality. 
+One thing we didn't discuss in part 1 was many-to-one relationships. Let's look back to the normalisation sports example a short while ago - imagine what happens if the tournament sponsor changes and this needs reflecting on all upcoming fixtures. With the normalised data, where the fixtures only have an ID, then a single message is sent out with the new tournament sponsor. On the other hand, if the tournament data is also included in all the fixture messages (for consumer convenience) then all those fixtures must be sent again. If there's hundreds of fixtures against a tournament, that's a lot of extra messages that need to be delivered and they'll all come in a burst which may impact other functionality. 
 
 That's not to say the denormalised option is always wrong, the convenience tradeoff may be worth it in many cases but be aware of the costs in both message volume and the need to recalculate and send all the entities that reference the thing that might change, in this case, all the fixtures.  
 
@@ -259,7 +250,7 @@ message: {
   }
 }
 ```
-If one message has the latest profile but older user preferecces and the next the latest preferences but older profile then you've got a problem! You could at least add versioning or timestamps at the level of the sub-entities but consumers must be aware of this. 
+If one message has the latest profile but older user preferences and the next the latest preferences but older profile then you've got a problem! You could at least add versioning or timestamps at the level of the sub-entities but consumers must be aware of this. 
 
 Such a scenario can occur both within a service or when aggregating messages from multiple services. 
 For the former imagine that address and email endpoints are hit in quick succession from a client but go to 2 different instances of the application providing the service. Each may read an old version of the data from the other endpoint when providing the full profile message. This is a strong reason not to aggregate within a service where you <em>can't guarantee linear ordering in the reads and writes all the way through to the message.</em>
