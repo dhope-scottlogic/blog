@@ -1,5 +1,5 @@
 ---
-title: Conscientious Computing: Integrating Sustainability into Non-Functional Requirements
+title: Conscientious Computing, Integrating Sustainability into Non-Functional Requirements
 date: 2024-05-12 12:45:00 Z
 categories:
 - Sustainability
@@ -11,7 +11,7 @@ author: nbarber
 ---
 
 
-As part of our Conscientious Computing series, we've explored the importance of considering the environmental impact of software development. In this instalment, we'll focus on the role of non-functional requirements (NFRs) in creating sustainable software solutions. 
+As part of our [Conscientious](https://blog.scottlogic.com/2023/12/19/green-software-podcasts-what-the-team-are-listening-to-right-now.html) Computing series, we've explored the importance of considering the environmental impact of software development. In this instalment, we'll focus on the role of non-functional requirements (NFRs) in creating sustainable software solutions. 
 
 As the world focuses more on the action needed to solve the climate crisis and with the ICT sector being responsible for [3-4% of global CO2 emissions](https://www.bcg.com/press/24june2021-telco-sector-game-changer-sustainability-shrinking-carbon-footprints), now is the time that development teams need to add sustainability and low carbon to their NFRs and here we’ll look at the considerations needed and some examples.  
 
