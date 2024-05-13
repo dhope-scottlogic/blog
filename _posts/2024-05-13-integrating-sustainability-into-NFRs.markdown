@@ -21,7 +21,7 @@ Non-Functional Requirements (NFRs) are aspects of software that define quality c
  * 95% of requests should be served in <= 150ms. 
  * Service A should be built with adaptability in mind such that we could roll out into a new market in 4 weeks. 
 
-### Why aren't sustainabilty NFRs prioritised today
+### Why aren't sustainability NFRs prioritised today
 Traditionally carbon emissions and environmental impact have not been prioritised as NFRs and there's a few possible reasons for this. One could be that the costs are generally someone else’s problem in the sense that we don’t personally suffer the effects of our service’s emissions.  Contrast with the case where your API is responding too slowly, and the engineering team will get a callout. Over time we expect development teams to face more pressure to keep emissions as low as possible as is now happening with cloud costs and the rise of FinOps. 
 
 Another reason may that setting sustainability NFRs isn't simple. In short, it's hard to say in advance that software service A should generate X emissions per month, because every application is slightly different and has different usage patterns. It’s not as simple as something like availability with a set of standard achievable values like (99%, 99.5%, 99.9%, ….) that is well understood. 
