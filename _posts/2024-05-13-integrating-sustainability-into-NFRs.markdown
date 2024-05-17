@@ -1,6 +1,6 @@
 ---
 title: Conscientious Computing - Integrating Sustainability into Non-Functional Requirements
-date: 2024-05-12 12:45:00 Z
+date: 2024-05-17 12:45:00 Z
 categories:
 - Sustainability
 tags:
@@ -24,7 +24,7 @@ Non-Functional Requirements (NFRs) are aspects of software that define quality c
 ### Why aren't sustainability NFRs prioritised today
 Traditionally carbon emissions and environmental impact have not been prioritised as NFRs and there's a few possible reasons for this. One could be that the costs are generally someone else’s problem in the sense that we don’t personally suffer the effects of our service’s emissions.  Contrast with the case where your API is responding too slowly, and the engineering team will get a callout. Over time we expect development teams to face more pressure to keep emissions as low as possible as is now happening with cloud costs and the rise of FinOps. 
 
-Another reason may that setting sustainability NFRs isn't simple. In short, it's hard to say in advance that software service A should generate X emissions per month, because every application is slightly different and has different usage patterns. It’s not as simple as something like availability with a set of standard achievable values like (99%, 99.5%, 99.9%, ….) that is well understood. 
+Another reason may be that setting sustainability NFRs isn't simple. In short, it's hard to say in advance that software service A should generate X emissions per month, because every application is slightly different and has different usage patterns. It’s not as simple as something like availability with a set of standard achievable values like (99%, 99.5%, 99.9%, ….) that is well understood. 
 
 Like cost, carbon emissions will very much depend on other NFRs like performance and availability. There is a mentality where we set those other NFRs as independent variables and a cost, financial or carbon, results as a dependent variable. We need to move to a mentality where carbon is weighed up independently against all the other NFRs. If we’re to deliver truly sustainable software solutions, we need to incorporate low carbon and sustainability attributes into the same conversations and processes where we consider performance, security, and usability.  
 
